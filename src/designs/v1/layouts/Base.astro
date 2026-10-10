@@ -1,0 +1,124 @@
+---
+import '@fontsource-variable/nunito';
+import '../styles/global.css';
+import '../styles/mock.css';
+import nunitoUrl from '@fontsource-variable/nunito/files/nunito-latin-wght-normal.woff2?url';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import DesignSwitcher from '../../../components/DesignSwitcher.astro';
+import { root } from '../../../lib/paths';
+import { site } from '../data/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** which nav item is current */
+  current?: string;
+}
+
+const { title, description = site.description, current } = Astro.props;
+const fullTitle = title ? `${title} · ${site.name}` : `${site.name} · ${site.tagline}`;
+---
+
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#faf6ee" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#15130f" media="(prefers-color-scheme: dark)" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <link rel="icon" href={`${root}/favicon.svg`} type="image/svg+xml" />
+    <link rel="preload" href={nunitoUrl} as="font" type="font/woff2" crossorigin />
+    <script is:inline>
+      (() => {
+        const root = document.documentElement;
+        root.classList.add('js');
+        let stored = null;
+        try {
+          stored = localStorage.getItem('theme');
+        } catch {}
+        const dark = stored ? stored === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+        root.dataset.theme = dark ? 'dark' : 'light';
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link btn btn--ink btn--sm" href="#main">skip to content</a>
+    <Nav current={current} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    <DesignSwitcher />
+
+    <script>
+      const root = document.documentElement;
+
+      // nav gets a backdrop once you scroll
+      const nav = document.querySelector<HTMLElement>('[data-nav]');
+      const onScroll = () => nav?.toggleAttribute('data-scrolled', window.scrollY > 8);
+      onScroll();
+      window.addEventListener('scroll', onScroll, { passive: true });
+
+      // mobile menu: close on link click / outside click
+      const menu = document.querySelector<HTMLDetailsElement>('[data-menu]');
+      menu?.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => (menu.open = false)));
+      document.addEventListener('click', (e) => {
+        if (menu?.open && !menu.contains(e.target as Node)) menu.open = false;
+      });
+
+      // theme toggle (remembers your choice; otherwise follows the system)
+      const toggles = document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]');
+      const syncLabels = () =>
+        toggles.forEach((t) =>
+          t.setAttribute('aria-label', root.dataset.theme === 'dark' ? 'switch to light mode' : 'switch to dark mode'),
+        );
+      const setTheme = (theme: string, remember: boolean) => {
+        const apply = () => {
+          root.dataset.theme = theme;
+          syncLabels();
+        };
+        if (document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.startViewTransition(apply);
+        } else {
+          apply();
+        }
+        if (remember) {
+          try {
+            localStorage.setItem('theme', theme);
+          } catch {}
+        }
+      };
+      syncLabels();
+      toggles.forEach((t) =>
+        t.addEventListener('click', () => setTheme(root.dataset.theme === 'dark' ? 'light' : 'dark', true)),
+      );
+      matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        let stored: string | null = null;
+        try {
+          stored = localStorage.getItem('theme');
+        } catch {}
+        if (!stored) setTheme(e.matches ? 'dark' : 'light', false);
+      });
+
+      // gentle reveal-on-scroll
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-in');
+              io.unobserve(entry.target);
+            }
+          }
+        },
+        { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
+      );
+      document.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
+    </script>
+  </body>
+</html>

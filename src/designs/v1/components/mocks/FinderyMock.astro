@@ -1,0 +1,337 @@
+---
+// the findery: the real coming-soon look (oxblood + cream) with a sneak peek of labels.
+import Icon from '../../../../components/Icon.astro';
+
+const filters = ['all', 'linen', 'knits', 'dresses', 'bags'];
+const labels = [
+  { what: 'linen sets', where: 'byron bay, nsw', icon: 'ph:shirt-folded-fill', tone: 'butter' },
+  { what: 'slip dresses', where: 'melbourne, vic', icon: 'ph:dress-fill', tone: 'pink' },
+  { what: 'chunky knits', where: 'hobart, tas', icon: 'ph:hoodie-fill', tone: 'lilac' },
+  { what: 'leather bags', where: 'fremantle, wa', icon: 'ph:handbag-fill', tone: 'mint' },
+];
+---
+
+<div class="findery" data-mock="findery">
+  <header class="f-nav">
+    <span class="f-logo">the findery</span>
+    <span class="f-links" aria-hidden="true"><span>new in</span><span>labels</span><span>edits</span></span>
+    <span class="f-est">est. 2026</span>
+  </header>
+
+  <section class="f-hero">
+    <p class="f-kicker">coming soon</p>
+    <p class="f-title">the findery</p>
+    <p class="f-sub">discover australia’s best emerging fashion brands.</p>
+    <div class="f-wait">
+      <span class="f-input" aria-hidden="true">your email address</span>
+      <a class="f-join" href="https://thefindery.app/" target="_blank" rel="noopener">join waitlist</a>
+    </div>
+  </section>
+
+  <section class="f-peek">
+    <div class="f-peek-head">
+      <p>a sneak peek</p>
+      <div class="f-filters" role="group" aria-label="filter labels">
+        {
+          filters.map((f, i) => (
+            <button type="button" class="f-filter" aria-pressed={i === 0 ? 'true' : 'false'} data-filter>
+              {f}
+            </button>
+          ))
+        }
+      </div>
+    </div>
+    <ul class="f-grid" role="list">
+      {
+        labels.map((l) => (
+          <li>
+            <div class="f-tile" data-tone={l.tone}>
+              <Icon name={l.icon} class="f-garment" />
+              <span class="f-new">new</span>
+              <button type="button" class="f-heart" aria-pressed="false" aria-label={`save ${l.what}`} data-heart>
+                <Icon name="ph:heart-fill" class="on" />
+                <Icon name="ph:heart-bold" class="off" />
+              </button>
+            </div>
+            <p class="f-what">{l.what}</p>
+            <p class="f-where">{l.where}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</div>
+
+<style>
+  .findery {
+    --oxblood: #66110b;
+    --oxblood-2: #7d1d15;
+    --cream: #f4ece2;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--cream);
+    color: #2a1512;
+    overflow: hidden;
+  }
+
+  :global(:root[data-theme='dark']) .findery {
+    --cream: #211a17;
+    color: #f4ece2;
+  }
+
+  .f-nav,
+  .f-hero {
+    background: var(--oxblood);
+    color: #f4ece2;
+  }
+
+  .f-nav {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    height: 40px;
+    padding: 0 18px;
+    border-bottom: 1px solid rgb(244 236 226 / 0.18);
+  }
+
+  .f-logo,
+  .f-title,
+  .f-kicker,
+  .f-est {
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .f-logo {
+    font-weight: 800;
+    font-size: 14px;
+  }
+
+  .f-links {
+    display: flex;
+    gap: 14px;
+    font-size: 11.5px;
+    opacity: 0.8;
+  }
+
+  .f-est {
+    margin-left: auto;
+    font-size: 10px;
+    opacity: 0.7;
+  }
+
+  .f-hero {
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    padding: 22px 18px 24px;
+    text-align: center;
+  }
+
+  .f-kicker {
+    font-size: 9.5px;
+    letter-spacing: 0.18em;
+    opacity: 0.75;
+  }
+
+  .f-title {
+    font-weight: 800;
+    font-size: clamp(26px, 7cqw, 40px);
+    line-height: 1;
+    letter-spacing: 0.01em;
+  }
+
+  .f-sub {
+    font-size: 12.5px;
+    opacity: 0.88;
+  }
+
+  .f-wait {
+    display: flex;
+    width: min(360px, 100%);
+    margin-top: 8px;
+    border: 1px solid rgb(244 236 226 / 0.45);
+  }
+
+  .f-input {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 10px;
+    font-size: 11.5px;
+    text-align: left;
+    opacity: 0.7;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .f-join {
+    flex: none;
+    padding: 8px 14px;
+    background: #efe6da;
+    color: var(--oxblood);
+    font-size: 11.5px;
+    font-weight: 700;
+    transition: background-color 0.15s;
+  }
+
+  .f-join:hover {
+    background: #fff;
+  }
+
+  .f-peek {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px 18px;
+  }
+
+  .f-peek-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .f-peek-head p {
+    font-weight: 700;
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+
+  .f-filters {
+    display: flex;
+    gap: 4px;
+    overflow: hidden;
+  }
+
+  .f-filter {
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    box-shadow: inset 0 0 0 1px rgb(102 17 11 / 0.25);
+    transition: background-color 0.15s;
+  }
+
+  :global(:root[data-theme='dark']) .f-filter {
+    box-shadow: inset 0 0 0 1px rgb(244 236 226 / 0.25);
+  }
+
+  .f-filter[aria-pressed='true'] {
+    background: var(--oxblood);
+    color: #f4ece2;
+    box-shadow: none;
+  }
+
+  .f-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .f-tile {
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 4 / 4.4;
+    background: var(--tone-soft);
+  }
+
+  .f-tile :global(.f-garment) {
+    width: 46%;
+    height: 46%;
+    color: var(--tone-deep);
+  }
+
+  .f-new {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    padding: 1px 6px;
+    background: var(--oxblood);
+    color: #f4ece2;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .f-heart {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.85);
+    color: var(--oxblood-2);
+    transition: transform 0.2s var(--ease-spring);
+  }
+
+  .f-heart:active {
+    transform: scale(0.85);
+  }
+
+  .f-heart :global(.icon) {
+    width: 13px;
+    height: 13px;
+  }
+
+  .f-heart[aria-pressed='true'] :global(.off),
+  .f-heart[aria-pressed='false'] :global(.on) {
+    display: none;
+  }
+
+  .f-what {
+    margin-top: 6px;
+    font-size: 12px;
+    font-weight: 650;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .f-where {
+    font-size: 10.5px;
+    opacity: 0.7;
+  }
+
+  @container (max-width: 560px) {
+    .f-links,
+    .f-filters {
+      display: none;
+    }
+  }
+
+  @container (max-width: 420px) {
+    .f-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .f-tile {
+      aspect-ratio: 4 / 3;
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-mock="findery"]').forEach((root) => {
+    root.querySelectorAll<HTMLButtonElement>('[data-heart]').forEach((heart) => {
+      heart.addEventListener('click', () => {
+        heart.setAttribute('aria-pressed', String(heart.getAttribute('aria-pressed') !== 'true'));
+      });
+    });
+
+    const filters = [...root.querySelectorAll<HTMLButtonElement>('[data-filter]')];
+    filters.forEach((filter) => {
+      filter.addEventListener('click', () => {
+        filters.forEach((f) => f.setAttribute('aria-pressed', String(f === filter)));
+      });
+    });
+  });
+</script>

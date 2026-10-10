@@ -1,0 +1,107 @@
+---
+// The pill bar for switching categories. Each pill is a real link (no JS needed).
+import Icon from '../../../components/Icon.astro';
+import { apps, appsIn } from '../data/apps';
+import { categories } from '../data/categories';
+import { to } from '../base';
+
+interface Props {
+  current?: string;
+}
+
+const { current = 'all' } = Astro.props;
+---
+
+<nav class="cat-nav" aria-label="categories">
+  <a class="pill" href={to('/categories')} aria-current={current === 'all' ? 'page' : undefined}>
+    <Icon name="ph:squares-four-fill" />
+    all apps <span class="n">{apps.length}</span>
+  </a>
+  {
+    categories.map((c) => (
+      <a
+        class="pill"
+        data-tone={c.tone}
+        href={to(`/categories/${c.slug}`)}
+        aria-current={current === c.slug ? 'page' : undefined}
+      >
+        <Icon name={c.icon} />
+        {c.name} <span class="n">{appsIn(c.slug).length}</span>
+      </a>
+    ))
+  }
+</nav>
+
+<style>
+  .cat-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 46px;
+    padding: 0 16px 0 14px;
+    margin-bottom: 4px;
+    border-radius: 999px;
+    background: var(--surface);
+    box-shadow:
+      0 0 0 1px var(--line),
+      0 4px 0 0 var(--line-2);
+    font-family: var(--font-display);
+    font-weight: 850;
+    font-size: 1.02rem;
+    transition:
+      transform 0.18s var(--ease-spring),
+      box-shadow 0.18s var(--ease-spring),
+      background-color 0.15s;
+  }
+
+  .pill :global(.icon) {
+    width: 19px;
+    height: 19px;
+    color: var(--tone-text, var(--brand-text));
+  }
+
+  .pill:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 0 0 1px var(--line),
+      0 6px 0 0 var(--line-2);
+  }
+
+  .pill:active {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 1px var(--line);
+  }
+
+  .pill[aria-current='page'] {
+    background: var(--tone, var(--brand));
+    color: var(--tone-on, var(--on-brand));
+    box-shadow: 0 4px 0 0 var(--tone-deep, var(--brand-deep));
+  }
+
+  .pill[aria-current='page'] :global(.icon) {
+    color: inherit;
+  }
+
+  .n {
+    display: grid;
+    place-items: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--paper-2);
+    color: var(--ink-2);
+    font-size: 0.82rem;
+  }
+
+  .pill[aria-current='page'] .n {
+    background: rgb(255 255 255 / 0.45);
+    color: inherit;
+  }
+</style>

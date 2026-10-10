@@ -1,0 +1,81 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Base from '../../../designs/v3/layouts/Base.astro';
+import CategoryTabs from '../../../designs/v3/components/CategoryTabs.astro';
+import CategoryIndex from '../../../designs/v3/components/CategoryIndex.astro';
+import AppCard from '../../../designs/v3/components/AppCard.astro';
+import { appsIn } from '../../../designs/v3/data/apps';
+import { categories, type Category } from '../../../designs/v3/data/categories';
+
+export const getStaticPaths = (() =>
+  categories.map((category) => ({ params: { slug: category.slug }, props: { category } }))) satisfies GetStaticPaths;
+
+interface Props {
+  category: Category;
+}
+
+const { category } = Astro.props;
+const list = appsIn(category.slug);
+const n = categories.indexOf(category) + 1;
+---
+
+<Base title={category.name} description={category.description} current="categories">
+  <section class="container head">
+    <p class="label rise">Category {String(n).padStart(2, '0')}</p>
+    <h1 class="display rise" style="--d: 60ms">{category.name}</h1>
+    <p class="lede rise" style="--d: 120ms">{category.description}</p>
+    <div class="rise" style="--d: 180ms">
+      <CategoryTabs current={category.slug} />
+    </div>
+  </section>
+
+  <section class="container apps" aria-label={`${category.name} apps`}>
+    <ul class="grid" role="list">
+      {
+        list.map((app, i) => (
+          <li class="rise" style={`--d:${220 + i * 80}ms`}>
+            <AppCard app={app} size="compact" morph headingLevel="h2" />
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="container others" aria-labelledby="others-title">
+    <h2 id="others-title" class="label" data-reveal>Other categories</h2>
+    <div data-reveal>
+      <CategoryIndex exclude={category.slug} />
+    </div>
+  </section>
+</Base>
+
+<style>
+  .head {
+    display: grid;
+    justify-items: start;
+    gap: 16px;
+    padding-top: clamp(32px, 5vw, 64px);
+  }
+
+  .head > div {
+    margin-top: 10px;
+  }
+
+  .apps {
+    padding-top: clamp(32px, 4vw, 48px);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+    gap: 14px;
+  }
+
+  .others {
+    padding-block: clamp(72px, 10vw, 128px);
+  }
+
+  .others h2 {
+    margin-bottom: 14px;
+  }
+</style>

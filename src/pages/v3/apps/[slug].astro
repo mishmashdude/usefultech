@@ -1,0 +1,422 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Base from '../../../designs/v3/layouts/Base.astro';
+import Icon from '../../../components/Icon.astro';
+import AppIcon from '../../../designs/v3/components/AppIcon.astro';
+import AppCard from '../../../designs/v3/components/AppCard.astro';
+import Screen from '../../../designs/v3/components/Screen.astro';
+import Gallery from '../../../designs/v3/components/Gallery.astro';
+import { apps, categoriesOf, type App } from '../../../designs/v3/data/apps';
+import { to } from '../../../designs/v3/base';
+
+export const getStaticPaths = (() => apps.map((app) => ({ params: { slug: app.slug }, props: { app } }))) satisfies GetStaticPaths;
+
+interface Props {
+  app: App;
+}
+
+const { app } = Astro.props;
+const cats = categoriesOf(app);
+const external = !!app.link && app.link.href.startsWith('http');
+const [center, left, right] = app.screens;
+// other apps: ones that share a category first
+const more = apps
+  .filter((a) => a.slug !== app.slug)
+  .sort(
+    (a, b) =>
+      Number(b.categories.some((c) => app.categories.includes(c))) -
+      Number(a.categories.some((c) => app.categories.includes(c))),
+  )
+  .slice(0, 3);
+---
+
+<Base title={app.name} description={`${app.name}: ${app.tagline}`} current="apps" padTop={false}>
+  <section class="hero" aria-labelledby="app-title">
+    <div class:list={['hero-card', `hero-card--${app.frame}`, { 'hero-card--empty': !center }]}>
+      <div class="media" aria-hidden="true">
+        {
+          !center ? (
+            <div class="empty">
+              <AppIcon app={app} size={96} />
+              <p>Screens coming soon</p>
+            </div>
+          ) : app.frame === 'browser' ? (
+            <Screen shot={center} url={app.url} class="shot shot--browser" eager sizes="(min-width: 1100px) 1100px, 130vw" />
+          ) : (
+            <>
+              {left && <Screen shot={left} class="shot shot--left" eager sizes="(min-width: 1000px) 250px, 34vw" />}
+              <Screen shot={center} class="shot shot--center" eager sizes="(min-width: 1000px) 300px, 44vw" />
+              {right && <Screen shot={right} class="shot shot--right" eager sizes="(min-width: 1000px) 250px, 34vw" />}
+            </>
+          )
+        }
+      </div>
+
+      <div class="hero-copy glass rise">
+        <nav class="crumbs" aria-label="Breadcrumb">
+          <a href={to('/#apps')}>Apps</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">{app.name}</span>
+        </nav>
+        <div class="title-row">
+          <AppIcon app={app} size={60} morph />
+          <h1 id="app-title" class="app-name">{app.name}</h1>
+        </div>
+        <p class="tagline">{app.tagline}</p>
+        <div class="actions">
+          {
+            app.link && (
+              <a
+                class="btn btn--solid"
+                href={app.link.href}
+                target={external ? '_blank' : undefined}
+                rel={external ? 'noopener' : undefined}
+              >
+                {app.link.label}
+                <Icon name="ph:arrow-up-right" />
+                {external && <span class="sr-only">(opens in a new tab)</span>}
+              </a>
+            )
+          }
+          <a class="btn btn--glass glass" href={to('/#apps')}>All apps</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="container intro" aria-label="About this app">
+    <p class="desc" data-reveal>{app.description}</p>
+    <dl class="facts" data-reveal>
+      <div>
+        <dt class="label">Platform</dt>
+        <dd>{app.platforms.join(', ')}</dd>
+      </div>
+      <div>
+        <dt class="label">Category</dt>
+        <dd>
+          {cats.map((c, i) => (
+            <>
+              {i > 0 && ', '}
+              <a href={to(`/categories/${c.slug}`)}>{c.name}</a>
+            </>
+          ))}
+        </dd>
+      </div>
+      {
+        app.maker && (
+          <div>
+            <dt class="label">Made by</dt>
+            <dd>{app.maker.name}</dd>
+          </div>
+        )
+      }
+      <div>
+        <dt class="label">Status</dt>
+        <dd>{app.status === 'soon' ? 'Coming soon' : 'Out now'}</dd>
+      </div>
+    </dl>
+  </section>
+
+  {
+    app.gallery.length > 0 && (
+      <section class="screens" aria-labelledby="screens-title">
+        <div class="container section-head" data-reveal>
+          <div>
+            <p class="label">Screens</p>
+            <h2 id="screens-title" class="title">From the app</h2>
+          </div>
+        </div>
+        <Gallery shots={app.gallery} url={app.url} label={`${app.name} screenshots`} />
+      </section>
+    )
+  }
+
+  <section class="container features" aria-label="Features">
+    <ul class="feature-grid" role="list">
+      {
+        app.features.map((f, i) => (
+          <li data-reveal style={`--d:${i * 70}ms`}>
+            <Icon name={f.icon} />
+            <h2>{f.title}</h2>
+            <p>{f.body}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="section" aria-labelledby="more-title">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <div>
+          <p class="label">Keep exploring</p>
+          <h2 id="more-title" class="title">More apps</h2>
+        </div>
+        <a class="link" href={to('/categories')}>All categories <Icon name="ph:arrow-right" /></a>
+      </div>
+      <ul class="grid" role="list">
+        {
+          more.map((a, i) => (
+            <li data-reveal style={`--d:${i * 70}ms`}>
+              <AppCard app={a} size="compact" />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* ---- hero ---- */
+  .hero {
+    padding: 10px var(--gutter) 0;
+  }
+
+  .hero-card {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    height: clamp(640px, 92svh, 900px);
+    border-radius: 40px;
+    background: var(--stage);
+  }
+
+  /* no screens yet: a shorter card */
+  .hero-card--empty {
+    height: clamp(520px, 66svh, 640px);
+  }
+
+  .media {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* phones are anchored to the bottom so cropped screens run off the card */
+  .media :global(.shot--center),
+  .media :global(.shot--left),
+  .media :global(.shot--right) {
+    position: absolute;
+    bottom: -56px;
+    left: 63%;
+    width: clamp(210px, 25vw, 350px);
+    translate: -50% 0;
+  }
+
+  .media :global(.shot--left),
+  .media :global(.shot--right) {
+    bottom: -110px;
+    width: clamp(175px, 20.5vw, 290px);
+    opacity: 0.92;
+  }
+
+  .media :global(.shot--center) {
+    z-index: 2;
+  }
+
+  .media :global(.shot--left) {
+    translate: -132% 0;
+  }
+
+  .media :global(.shot--right) {
+    translate: 32% 0;
+  }
+
+  .media :global(.shot--browser) {
+    position: absolute;
+    top: 110px;
+    left: 30%;
+    width: max(900px, 82%);
+  }
+
+  .empty {
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 16px;
+    height: 100%;
+    padding-left: 30%;
+    color: var(--ink-3);
+  }
+
+  .hero-copy {
+    position: absolute;
+    left: clamp(12px, 2vw, 24px);
+    bottom: clamp(12px, 2vw, 24px);
+    display: grid;
+    gap: 16px;
+    width: min(520px, calc(100% - 24px));
+    padding: clamp(22px, 3vw, 32px);
+    border-radius: 32px;
+  }
+
+  .crumbs {
+    display: flex;
+    gap: 8px;
+    font-size: 0.8125rem;
+    color: var(--ink-3);
+  }
+
+  .crumbs a {
+    border-radius: 4px;
+  }
+
+  .crumbs a:hover {
+    color: var(--ink);
+  }
+
+  .crumbs [aria-current] {
+    color: var(--ink);
+  }
+
+  .title-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .app-name {
+    font-size: clamp(2.4rem, 1.6rem + 3vw, 4.2rem);
+    font-weight: 600;
+    letter-spacing: -0.055em;
+    line-height: 0.95;
+  }
+
+  .tagline {
+    font-size: clamp(1.1rem, 1rem + 0.5vw, 1.35rem);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--ink-2);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  @media (max-width: 860px) {
+    .media :global(.shot--center) {
+      left: 50%;
+      bottom: auto;
+      top: 96px;
+      width: max(46vw, 200px);
+    }
+
+    .media :global(.shot--left),
+    .media :global(.shot--right) {
+      display: none;
+    }
+
+    .media :global(.shot--browser) {
+      left: 8%;
+      top: 96px;
+      width: 150%;
+    }
+
+    .empty {
+      padding: 0 0 240px;
+    }
+  }
+
+  /* ---- intro ---- */
+  .intro {
+    display: grid;
+    gap: 28px 64px;
+    padding-block: clamp(56px, 8vw, 104px) clamp(32px, 5vw, 56px);
+  }
+
+  @media (min-width: 900px) {
+    .intro {
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+      align-items: end;
+    }
+  }
+
+  .desc {
+    max-width: 22em;
+    font-size: clamp(1.4rem, 1.1rem + 1.2vw, 2.1rem);
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    line-height: 1.15;
+  }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 24px;
+  }
+
+  .facts div {
+    display: grid;
+    gap: 4px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line-2);
+  }
+
+  .facts dd {
+    font-weight: 500;
+  }
+
+  .facts dd a {
+    border-radius: 4px;
+  }
+
+  .facts dd a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* ---- screens + features ---- */
+  .screens {
+    padding-top: clamp(32px, 5vw, 56px);
+  }
+
+  .features {
+    padding-top: clamp(48px, 7vw, 88px);
+  }
+
+  .feature-grid {
+    display: grid;
+    gap: 14px;
+  }
+
+  @media (min-width: 760px) {
+    .feature-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .feature-grid li {
+    display: grid;
+    align-content: start;
+    gap: 6px;
+    padding: 26px;
+    border-radius: var(--r-lg);
+    background: var(--stage);
+  }
+
+  .feature-grid :global(.icon) {
+    width: 22px;
+    height: 22px;
+    margin-bottom: 18px;
+  }
+
+  .feature-grid h2 {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .feature-grid p {
+    color: var(--ink-2);
+    font-size: 0.9375rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+    gap: 14px;
+  }
+</style>

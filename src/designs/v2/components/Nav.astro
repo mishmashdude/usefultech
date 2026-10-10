@@ -1,0 +1,177 @@
+---
+import { to } from '../base';
+import Logo from './Logo.astro';
+import Icon from '../../../components/Icon.astro';
+
+interface Props {
+  current?: string;
+}
+
+const { current } = Astro.props;
+const links = [
+  { href: to('/#apps'), label: 'Apps', key: 'apps' },
+  { href: to('/categories'), label: 'Categories', key: 'categories' },
+  { href: to('/#about'), label: 'About', key: 'about' },
+];
+---
+
+<header class="nav" data-nav>
+  <div class="container nav-inner">
+    <a href={to('/')} class="nav-brand" aria-label="usefultech home"><Logo /></a>
+
+    <nav class="nav-links" aria-label="Primary">
+      {
+        links.map((l) => (
+          <a href={l.href} aria-current={l.key === current ? 'page' : undefined}>
+            {l.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="nav-end">
+      <button type="button" class="icon-btn" data-theme-toggle aria-label="Switch to dark mode">
+        <Icon name="ph:moon" class="when-light" />
+        <Icon name="ph:sun" class="when-dark" />
+      </button>
+      <details class="menu" data-menu>
+        <summary class="icon-btn" aria-label="Menu"><Icon name="ph:list" /></summary>
+        <div class="menu-panel">
+          {links.map((l) => <a href={l.href}>{l.label}</a>)}
+        </div>
+      </details>
+    </div>
+  </div>
+</header>
+
+<style>
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    transition:
+      background-color 0.2s,
+      box-shadow 0.2s;
+  }
+
+  .nav[data-scrolled] {
+    background: color-mix(in oklab, var(--bg) 86%, transparent);
+    backdrop-filter: blur(14px) saturate(1.4);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    box-shadow: 0 1px 0 var(--line);
+  }
+
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: 64px;
+  }
+
+  .nav-brand {
+    border-radius: 8px;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2px;
+    margin-left: auto;
+  }
+
+  .nav-links a {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--ink-2);
+    transition: color 0.15s;
+  }
+
+  .nav-links a:hover,
+  .nav-links a[aria-current='page'] {
+    color: var(--ink);
+  }
+
+  .nav-end {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .icon-btn {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition:
+      color 0.15s,
+      background-color 0.15s;
+  }
+
+  .icon-btn:hover {
+    color: var(--ink);
+    background: var(--bg-2);
+  }
+
+  .icon-btn :global(.icon) {
+    width: 19px;
+    height: 19px;
+  }
+
+  :global(:root[data-theme='dark']) .icon-btn :global(.when-light),
+  :global(:root:not([data-theme='dark'])) .icon-btn :global(.when-dark) {
+    display: none;
+  }
+
+  .menu {
+    display: none;
+    position: relative;
+  }
+
+  .menu summary {
+    list-style: none;
+  }
+
+  .menu summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .menu-panel {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 10px);
+    display: grid;
+    min-width: 200px;
+    padding: 6px;
+    border-radius: 14px;
+    background: var(--surface);
+    box-shadow: var(--shadow-float);
+  }
+
+  .menu-panel a {
+    padding: 10px 12px;
+    border-radius: 9px;
+    font-weight: 500;
+  }
+
+  .menu-panel a:hover {
+    background: var(--bg-2);
+  }
+
+  @media (max-width: 640px) {
+    .nav-links {
+      display: none;
+    }
+
+    .nav-end {
+      margin-left: auto;
+    }
+
+    .menu {
+      display: block;
+    }
+  }
+</style>

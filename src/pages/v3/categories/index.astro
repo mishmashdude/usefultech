@@ -1,0 +1,97 @@
+---
+import Base from '../../../designs/v3/layouts/Base.astro';
+import Icon from '../../../components/Icon.astro';
+import CategoryTabs from '../../../designs/v3/components/CategoryTabs.astro';
+import AppCard from '../../../designs/v3/components/AppCard.astro';
+import { appsIn } from '../../../designs/v3/data/apps';
+import { categories } from '../../../designs/v3/data/categories';
+import { to } from '../../../designs/v3/base';
+---
+
+<Base title="Categories" description="Browse usefultech apps by category." current="categories">
+  <section class="container head">
+    <p class="label rise">Browse</p>
+    <h1 class="display rise" style="--d: 60ms">Categories</h1>
+    <p class="lede rise" style="--d: 120ms">Browse apps by what you need.</p>
+    <div class="rise" style="--d: 180ms">
+      <CategoryTabs current="all" />
+    </div>
+  </section>
+
+  {
+    categories.map((c, i) => (
+      <section class="container cat" id={c.slug} aria-labelledby={`${c.slug}-title`}>
+        <div class="cat-head" data-reveal>
+          <span class="num">{String(i + 1).padStart(2, '0')}</span>
+          <h2 id={`${c.slug}-title`}>{c.name}</h2>
+          <p class="muted">{c.description}</p>
+          <a class="link" href={to(`/categories/${c.slug}`)}>
+            View <Icon name="ph:arrow-right" />
+          </a>
+        </div>
+        <ul class="grid" role="list">
+          {appsIn(c.slug).map((app) => (
+            <li data-reveal>
+              <AppCard app={app} size="compact" />
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+  <div class="end"></div>
+</Base>
+
+<style>
+  .head {
+    display: grid;
+    justify-items: start;
+    gap: 16px;
+    padding-top: clamp(32px, 5vw, 64px);
+  }
+
+  .head > div {
+    margin-top: 10px;
+  }
+
+  .cat {
+    padding-top: clamp(56px, 7vw, 96px);
+    scroll-margin-top: 90px;
+  }
+
+  .cat-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 16px;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line-2);
+  }
+
+  .num {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--ink-3);
+  }
+
+  .cat-head h2 {
+    font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+    letter-spacing: -0.04em;
+  }
+
+  .cat-head .link {
+    margin-left: auto;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr));
+    gap: 14px;
+  }
+
+  .end {
+    height: clamp(72px, 10vw, 128px);
+  }
+</style>

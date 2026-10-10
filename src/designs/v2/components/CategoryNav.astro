@@ -1,0 +1,75 @@
+---
+import { to } from '../base';
+// Tabs for switching categories. Each one is a real link (no JS needed).
+import { apps, appsIn } from '../data/apps';
+import { categories } from '../data/categories';
+
+interface Props {
+  current?: string;
+}
+
+const { current = 'all' } = Astro.props;
+const tabs = [
+  { href: to('/categories'), label: 'All', count: apps.length, key: 'all' },
+  ...categories.map((c) => ({ href: to(`/categories/${c.slug}`), label: c.name, count: appsIn(c.slug).length, key: c.slug })),
+];
+---
+
+<nav class="tabs" aria-label="Categories">
+  {
+    tabs.map((t) => (
+      <a class="tab" href={t.href} aria-current={t.key === current ? 'page' : undefined}>
+        {t.label}
+        <span class="n">{t.count}</span>
+      </a>
+    ))
+  }
+</nav>
+
+<style>
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+    padding: 0 14px;
+    margin-bottom: 3px;
+    border-radius: 10px;
+    background: var(--btn);
+    color: var(--btn-fg);
+    box-shadow: 0 3px 0 0 var(--btn-edge);
+    font-size: 0.875rem;
+    font-weight: 550;
+    transition:
+      transform 0.15s var(--ease),
+      box-shadow 0.15s var(--ease);
+  }
+
+  .tab:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 0 0 var(--btn-edge);
+  }
+
+  .tab:active {
+    transform: translateY(3px);
+    box-shadow: 0 0 0 0 var(--btn-edge);
+  }
+
+  .tab[aria-current='page'] {
+    background: var(--btn-primary);
+    color: var(--btn-primary-fg);
+    box-shadow: 0 3px 0 0 var(--btn-primary-edge);
+  }
+
+  .n {
+    font-size: 0.75rem;
+    opacity: 0.6;
+    font-variant-numeric: tabular-nums;
+  }
+</style>

@@ -1,0 +1,582 @@
+---
+// conscious: today screen with rings, a timeline and the mindful "breathing pause" gate.
+import Icon from '../../../../components/Icon.astro';
+import ShellGlyph from '../ShellGlyph.astro';
+
+const rings = [
+  { label: 'productive', value: '64%', p: 64, tone: 'sky' },
+  { label: 'screen time', value: '2h 14', p: 56, tone: 'brand' },
+  { label: 'score', value: '82', p: 82, tone: 'mint' },
+];
+// minutes per hour, split into productive / draining
+const hours = [
+  [6, 2], [10, 4], [4, 12], [14, 6], [8, 3], [18, 4], [5, 16], [12, 8], [3, 10], [9, 2],
+];
+const usage = [
+  { name: 'social', icon: 'ph:chats-teardrop-fill', time: '48m', tone: 'pink' },
+  { name: 'video', icon: 'ph:play-fill', time: '31m', tone: 'butter' },
+  { name: 'news', icon: 'ph:newspaper-fill', time: '12m', tone: 'sky' },
+];
+---
+
+<div class="conscious" data-mock="conscious" data-tone="lilac">
+  <div class="screen-body">
+    <div class="head">
+      <p class="brand"><ShellGlyph />conscious</p>
+      <span class="date">today <Icon name="ph:caret-down-bold" /></span>
+    </div>
+
+    <div class="rings" aria-hidden="true">
+      {
+        rings.map((r) => (
+          <div class="ring" data-tone={r.tone}>
+            <svg viewBox="0 0 36 36">
+              <circle class="track" cx="18" cy="18" r="15.9155" />
+              <circle class="fill" cx="18" cy="18" r="15.9155" style={`stroke-dasharray:${r.p} 100`} />
+            </svg>
+            <b>{r.value}</b>
+            <small>{r.label}</small>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="stats" aria-hidden="true">
+      <div class="stat">
+        <small>pickups</small>
+        <b>41</b>
+        <span class="good">9 fewer</span>
+      </div>
+      <div class="stat">
+        <small>pauses taken</small>
+        <b>12</b>
+        <span class="good">7 skipped</span>
+      </div>
+    </div>
+
+    <div class="card timeline" aria-hidden="true">
+      <p class="card-title">timeline <span><i class="dot dot--good"></i>productive <i class="dot dot--bad"></i>draining</span></p>
+      <div class="bars">
+        {
+          hours.map(([good, bad]) => (
+            <span class="bar">
+              <span class="bad" style={`height:${bad * 4}%`} />
+              <span class="good" style={`height:${good * 4}%`} />
+            </span>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="card usage">
+      <p class="card-title">app usage <span class="hint">tap one to open it</span></p>
+      <ul role="list">
+        {
+          usage.map((u) => (
+            <li>
+              <button type="button" class="app-row" data-try={u.name}>
+                <span class="app-ico" data-tone={u.tone}>
+                  <Icon name={u.icon} />
+                </span>
+                <span class="app-name">{u.name}</span>
+                <span class="app-time">{u.time}</span>
+                <Icon name="ph:caret-right-bold" class="chev" />
+              </button>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+
+  <nav class="tabbar" aria-hidden="true">
+    <span class="tab is-on"><Icon name="ph:sun-fill" />today</span>
+    <span class="tab"><Icon name="ph:chart-bar-fill" />insights</span>
+    <span class="tab"><Icon name="ph:sliders-fill" />controls</span>
+    <span class="tab"><Icon name="ph:gear-six-fill" />settings</span>
+  </nav>
+
+  <div class="gate" data-gate hidden role="dialog" aria-modal="true" aria-label="breathing pause">
+    <p class="gate-kicker">you’re about to open <b data-gate-app>social</b></p>
+    <div class="breath" aria-hidden="true">
+      <span class="breath-ring"></span>
+      <span class="breath-count" data-gate-count>15</span>
+    </div>
+    <p class="gate-title">take a breath.</p>
+    <p class="gate-sub">is this what you meant to do right now?</p>
+    <button type="button" class="m-btn gate-skip" data-gate-skip>don’t open</button>
+    <button type="button" class="gate-open" data-gate-open disabled>open in 15s</button>
+  </div>
+  <p class="m-toast" data-gate-note hidden><Icon name="ph:check-circle-fill" />nice. one less scroll today</p>
+</div>
+
+<style>
+  .conscious {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #fbf8ff;
+    color: #241c3a;
+    overflow: hidden;
+  }
+
+  :global(:root[data-theme='dark']) .conscious {
+    background: #1b1828;
+    color: #ece6ff;
+  }
+
+  .screen-body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75em;
+    padding: 3.3em 1.15em 0.6em;
+  }
+
+  .head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 1.45em;
+    letter-spacing: -0.04em;
+  }
+
+  .brand :global(.shell-glyph) {
+    --glyph-fill: #ffc9a6;
+    --glyph-detail: #d9845a;
+    width: 1.1em;
+    height: 1.1em;
+  }
+
+  .date {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+    padding: 0.3em 0.75em;
+    border-radius: 999px;
+    background: var(--lilac-soft);
+    color: var(--lilac-ink);
+    font-size: 0.85em;
+    font-weight: 650;
+  }
+
+  .date :global(.icon) {
+    width: 0.9em;
+    height: 0.9em;
+  }
+
+  /* rings */
+  .rings {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5em;
+  }
+
+  .ring {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 0.2em;
+  }
+
+  .ring svg {
+    width: 4.4em;
+    height: 4.4em;
+    rotate: -90deg;
+  }
+
+  .ring circle {
+    fill: none;
+    stroke-width: 3.6;
+  }
+
+  .ring .track {
+    stroke: color-mix(in oklab, var(--tone) 22%, transparent);
+  }
+
+  .ring .fill {
+    stroke: var(--tone);
+    stroke-linecap: round;
+  }
+
+  .ring b {
+    position: absolute;
+    top: 2.45em; /* centre of the 4.4em ring, in this element's 0.9em font size */
+    left: 50%;
+    translate: -50% -50%;
+    white-space: nowrap;
+    font-size: 0.9em;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .ring small {
+    font-size: 0.72em;
+    opacity: 0.7;
+  }
+
+  /* stats + cards */
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6em;
+  }
+
+  .stat,
+  .card {
+    padding: 0.65em 0.8em;
+    border-radius: 1em;
+    background: #fff;
+    box-shadow: 0 0 0 1px rgb(36 28 58 / 0.06);
+  }
+
+  :global(:root[data-theme='dark']) :is(.stat, .card) {
+    background: #252136;
+    box-shadow: 0 0 0 1px rgb(255 255 255 / 0.06);
+  }
+
+  .stat {
+    display: grid;
+    line-height: 1.15;
+  }
+
+  .stat small {
+    font-size: 0.75em;
+    opacity: 0.65;
+  }
+
+  .stat b {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 1.6em;
+    letter-spacing: -0.03em;
+  }
+
+  .good {
+    font-size: 0.72em;
+    font-weight: 650;
+    color: var(--mint-text);
+  }
+
+  .card-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5em;
+    font-weight: 750;
+    font-size: 0.9em;
+    margin-bottom: 0.45em;
+  }
+
+  .card-title span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    font-size: 0.78em;
+    font-weight: 600;
+    opacity: 0.7;
+  }
+
+  .dot {
+    width: 0.6em;
+    height: 0.6em;
+    border-radius: 50%;
+  }
+
+  .dot--good,
+  .bar .good {
+    background: var(--mint);
+  }
+
+  .dot--bad,
+  .bar .bad {
+    background: var(--pink);
+  }
+
+  .bars {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 0.35em;
+    align-items: end;
+    height: 3.6em;
+  }
+
+  .bar {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 0.12em;
+    height: 100%;
+    justify-content: flex-start;
+  }
+
+  .bar span {
+    display: block;
+    border-radius: 0.25em;
+    min-height: 0.2em;
+  }
+
+  /* app usage */
+  .usage ul {
+    display: grid;
+    gap: 0.15em;
+  }
+
+  .hint {
+    color: var(--lilac-text);
+    opacity: 1 !important;
+  }
+
+  .app-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: 0.6em;
+    width: 100%;
+    padding: 0.35em 0.2em;
+    border-radius: 0.7em;
+    text-align: left;
+    transition: background-color 0.15s;
+  }
+
+  .app-row:hover {
+    background: var(--lilac-soft);
+  }
+
+  .app-ico {
+    display: grid;
+    place-items: center;
+    width: 2em;
+    height: 2em;
+    border-radius: 0.6em;
+    background: var(--tone);
+    color: var(--tone-on);
+  }
+
+  .app-ico :global(.icon) {
+    width: 1.1em;
+    height: 1.1em;
+  }
+
+  .app-name {
+    font-weight: 650;
+  }
+
+  .app-time {
+    font-size: 0.85em;
+    opacity: 0.7;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .app-row :global(.chev) {
+    width: 0.85em;
+    height: 0.85em;
+    opacity: 0.4;
+  }
+
+  /* tab bar */
+  .tabbar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    padding: 0.55em 0.6em 1.6em;
+    border-top: 1px solid rgb(36 28 58 / 0.08);
+    background: inherit;
+  }
+
+  .tab {
+    display: grid;
+    justify-items: center;
+    gap: 0.15em;
+    font-size: 0.68em;
+    font-weight: 600;
+    opacity: 0.5;
+  }
+
+  .tab :global(.icon) {
+    width: 1.9em;
+    height: 1.9em;
+  }
+
+  .tab.is-on {
+    opacity: 1;
+    color: var(--lilac-text);
+  }
+
+  /* the breathing pause */
+  .gate {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6em;
+    padding: 2em 1.6em;
+    text-align: center;
+    background: var(--lilac-soft);
+    color: var(--lilac-ink);
+    animation: gate-in 0.35s var(--ease-out) both;
+  }
+
+  @keyframes gate-in {
+    from {
+      opacity: 0;
+      transform: scale(1.04);
+    }
+  }
+
+  .gate-kicker {
+    font-size: 0.9em;
+  }
+
+  .breath {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 8.5em;
+    height: 8.5em;
+    margin: 0.8em 0;
+  }
+
+  .breath-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--lilac);
+    opacity: 0.55;
+    animation: breathe 4s ease-in-out infinite;
+  }
+
+  .breath-ring::after {
+    content: '';
+    position: absolute;
+    inset: 22%;
+    border-radius: 50%;
+    background: var(--lilac);
+  }
+
+  @keyframes breathe {
+    0%,
+    100% {
+      transform: scale(0.72);
+    }
+    50% {
+      transform: scale(1);
+    }
+  }
+
+  .breath-count {
+    position: relative;
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 2.2em;
+    color: var(--lilac-on);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .gate-title {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 1.6em;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .gate-sub {
+    font-size: 0.85em;
+    opacity: 0.8;
+    margin-bottom: 0.6em;
+  }
+
+  .gate-skip {
+    width: 100%;
+  }
+
+  .gate-open {
+    font-size: 0.85em;
+    font-weight: 600;
+    padding: 0.5em;
+    opacity: 0.75;
+  }
+
+  .gate-open:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-mock="conscious"]').forEach((root) => {
+    const gate = root.querySelector<HTMLElement>('[data-gate]');
+    const count = root.querySelector<HTMLElement>('[data-gate-count]');
+    const appName = root.querySelector<HTMLElement>('[data-gate-app]');
+    const skip = root.querySelector<HTMLButtonElement>('[data-gate-skip]');
+    const open = root.querySelector<HTMLButtonElement>('[data-gate-open]');
+    const note = root.querySelector<HTMLElement>('[data-gate-note]');
+    const behind = root.querySelectorAll<HTMLElement>('.screen-body, .tabbar');
+    if (!gate || !count || !appName || !skip || !open || !note) return;
+
+    let timer: number | undefined;
+    let noteTimer: number | undefined;
+    let opener: HTMLElement | null = null;
+
+    const close = (skipped: boolean) => {
+      window.clearInterval(timer);
+      const hadFocus = gate.contains(document.activeElement);
+      gate.hidden = true;
+      behind.forEach((el) => (el.inert = false));
+      if (hadFocus) opener?.focus({ preventScroll: true });
+      if (skipped) {
+        note.hidden = false;
+        window.clearTimeout(noteTimer);
+        noteTimer = window.setTimeout(() => (note.hidden = true), 2200);
+      }
+    };
+
+    root.querySelectorAll<HTMLButtonElement>('[data-try]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        let left = 15;
+        opener = btn;
+        appName.textContent = btn.dataset.try ?? 'this app';
+        count.textContent = String(left);
+        open.disabled = true;
+        open.textContent = `open in ${left}s`;
+        note.hidden = true;
+        gate.hidden = false;
+        behind.forEach((el) => (el.inert = true));
+        skip.focus({ preventScroll: true });
+        window.clearInterval(timer);
+        timer = window.setInterval(() => {
+          left -= 1;
+          count.textContent = String(Math.max(left, 0));
+          if (left <= 0) {
+            window.clearInterval(timer);
+            open.disabled = false;
+            open.textContent = 'open anyway';
+          } else {
+            open.textContent = `open in ${left}s`;
+          }
+        }, 1000);
+      });
+    });
+
+    skip.addEventListener('click', () => close(true));
+    open.addEventListener('click', () => close(false));
+    gate.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        event.stopPropagation();
+        close(true);
+      }
+    });
+  });
+</script>

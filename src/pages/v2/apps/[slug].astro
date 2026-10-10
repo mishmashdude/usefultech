@@ -1,0 +1,308 @@
+---
+import { to } from '../../../designs/v2/base';
+import type { GetStaticPaths } from 'astro';
+import Base from '../../../designs/v2/layouts/Base.astro';
+import Icon from '../../../components/Icon.astro';
+import AppIcon from '../../../designs/v2/components/AppIcon.astro';
+import AppCard from '../../../designs/v2/components/AppCard.astro';
+import MacWindow from '../../../designs/v2/components/MacWindow.astro';
+import AppMock from '../../../designs/v2/components/mocks/AppMock.astro';
+import { accentStyle, apps, categoriesOf, type App } from '../../../designs/v2/data/apps';
+
+export const getStaticPaths = (() => apps.map((app) => ({ params: { slug: app.slug }, props: { app } }))) satisfies GetStaticPaths;
+
+interface Props {
+  app: App;
+}
+
+const { app } = Astro.props;
+const cats = categoriesOf(app);
+const external = !!app.link && app.link.href.startsWith('http');
+// other apps: ones that share a category first
+const more = apps
+  .filter((a) => a.slug !== app.slug)
+  .sort(
+    (a, b) =>
+      Number(b.categories.some((c) => app.categories.includes(c))) -
+      Number(a.categories.some((c) => app.categories.includes(c))),
+  )
+  .slice(0, 3);
+---
+
+<Base title={app.name} description={`${app.name}: ${app.tagline}`} current="apps">
+  <section class="container app-hero">
+    <div class="copy">
+      <nav class="crumbs rise" aria-label="Breadcrumb">
+        <a href={to('/#apps')}>Apps</a>
+        <Icon name="ph:caret-right" />
+        <span aria-current="page">{app.name}</span>
+      </nav>
+
+      <div class="title-row rise" style="--d: 60ms">
+        <AppIcon app={app} size={56} morph />
+        <h1 class="title-xl">{app.name}</h1>
+      </div>
+
+      <p class="tagline rise" style="--d: 100ms">{app.tagline}</p>
+      <p class="desc rise" style="--d: 140ms">{app.description}</p>
+
+      <div class="actions rise" style="--d: 180ms">
+        {
+          app.link && (
+            <a
+              class="btn btn--primary"
+              href={app.link.href}
+              target={external ? '_blank' : undefined}
+              rel={external ? 'noopener' : undefined}
+            >
+              {app.link.label}
+              <Icon name="ph:arrow-up-right" />
+              {external && <span class="sr-only">(opens in a new tab)</span>}
+            </a>
+          )
+        }
+        <a class="btn" href={to('/#apps')}>All apps</a>
+      </div>
+
+      <dl class="facts rise" style="--d: 220ms">
+        <div>
+          <dt>Platform</dt>
+          <dd>{app.platforms.join(', ')}</dd>
+        </div>
+        <div>
+          <dt>Category</dt>
+          <dd>
+            {cats.map((c, i) => (
+              <>
+                {i > 0 && ', '}
+                <a href={to(`/categories/${c.slug}`)}>{c.name}</a>
+              </>
+            ))}
+          </dd>
+        </div>
+        {
+          app.maker && (
+            <div>
+              <dt>Made by</dt>
+              <dd>{app.maker.name}</dd>
+            </div>
+          )
+        }
+        {
+          app.status === 'soon' && (
+            <div>
+              <dt>Status</dt>
+              <dd>Coming soon</dd>
+            </div>
+          )
+        }
+      </dl>
+    </div>
+
+    <div class:list={['stage', 'rise', `stage--${app.frame}`]} style="--d: 120ms">
+      <MacWindow frame={app.frame} title={app.window.title} url={app.window.url} appName={app.name} accent={app.accent}>
+        <AppMock app={app} />
+      </MacWindow>
+    </div>
+  </section>
+
+  <section class="container features" aria-label="Features" data-accent style={accentStyle(app)}>
+    <ul class="feature-grid" role="list">
+      {
+        app.features.map((f, i) => (
+          <li data-reveal style={`--d:${i * 60}ms`}>
+            <Icon name={f.icon} />
+            <h2>{f.title}</h2>
+            <p>{f.body}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="section more" aria-labelledby="more-title">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <h2 id="more-title" class="title-lg">More apps</h2>
+        <a class="link" href={to('/categories')}>All categories <Icon name="ph:arrow-right" /></a>
+      </div>
+      <ul class="grid" role="list">
+        {
+          more.map((a, i) => (
+            <li data-reveal style={`--d:${i * 60}ms`}>
+              <AppCard app={a} />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .app-hero {
+    display: grid;
+    gap: clamp(36px, 5vw, 64px);
+    align-items: center;
+    padding-top: clamp(32px, 5vw, 64px);
+  }
+
+  @media (min-width: 960px) {
+    .app-hero {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    }
+  }
+
+  .copy {
+    display: grid;
+    justify-items: start;
+    gap: 16px;
+  }
+
+  .crumbs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.875rem;
+    color: var(--ink-3);
+  }
+
+  .crumbs a {
+    border-radius: 4px;
+  }
+
+  .crumbs a:hover {
+    color: var(--ink);
+  }
+
+  .crumbs :global(.icon) {
+    width: 12px;
+    height: 12px;
+  }
+
+  .crumbs [aria-current] {
+    color: var(--ink);
+  }
+
+  .title-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 8px;
+  }
+
+  .tagline {
+    font-size: clamp(1.3rem, 1.1rem + 0.8vw, 1.7rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+  }
+
+  .desc {
+    color: var(--ink-2);
+    max-width: 32em;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 32px;
+    margin-top: 12px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    width: 100%;
+  }
+
+  .facts dt {
+    font-size: 0.8125rem;
+    color: var(--ink-3);
+  }
+
+  .facts dd {
+    font-weight: 550;
+  }
+
+  .facts dd a {
+    border-radius: 4px;
+  }
+
+  .facts dd a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .stage {
+    display: grid;
+    place-items: center;
+    min-height: clamp(420px, 46vw, 600px);
+    padding: clamp(24px, 4vw, 48px) clamp(16px, 3vw, 40px);
+    border-radius: var(--radius-xl);
+    background: var(--bg-2);
+  }
+
+  .stage :global(.win) {
+    width: 100%;
+  }
+
+  .stage--phone :global(.win) {
+    width: min(280px, 78%);
+  }
+
+  .stage:not(.stage--phone) :global(.win) {
+    height: clamp(360px, 36vw, 460px);
+  }
+
+  .features {
+    padding-top: clamp(64px, 9vw, 112px);
+  }
+
+  .feature-grid {
+    display: grid;
+    gap: 28px 32px;
+  }
+
+  @media (min-width: 760px) {
+    .feature-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .feature-grid li {
+    display: grid;
+    align-content: start;
+    gap: 6px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+  }
+
+  .feature-grid :global(.icon) {
+    width: 22px;
+    height: 22px;
+    margin-bottom: 6px;
+    color: var(--accent);
+  }
+
+  .feature-grid h2 {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+
+  .feature-grid p {
+    color: var(--ink-2);
+    font-size: 0.9375rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    gap: 20px;
+  }
+</style>

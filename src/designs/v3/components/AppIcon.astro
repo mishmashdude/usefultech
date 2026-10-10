@@ -1,0 +1,79 @@
+---
+// The real app icon when there is one, otherwise a quiet monogram or glyph tile.
+import { Image } from 'astro:assets';
+import Icon from '../../../components/Icon.astro';
+import type { App } from '../data/apps';
+
+interface Props {
+  app: Pick<App, 'icon' | 'slug'>;
+  size?: number;
+  class?: string;
+  /** opt into a cross-page morph (use on one icon per app per page) */
+  morph?: boolean;
+}
+
+const { app, size = 44, class: className, morph = false } = Astro.props;
+const { image, monogram, glyph } = app.icon;
+const style = [
+  `--s:${size}px`,
+  monogram ? `--mono-bg:${monogram.bg};--mono-fg:${monogram.fg}` : '',
+  morph ? `view-transition-name:app-icon-${app.slug}` : '',
+]
+  .filter(Boolean)
+  .join(';');
+---
+
+<span
+  class:list={['app-icon', { 'app-icon--mono': !image && monogram, 'app-icon--glyph': !image && !monogram }, className]}
+  style={style}
+  aria-hidden="true"
+>
+  {
+    image ? (
+      <Image src={image} alt="" width={size} height={size} densities={[1, 2]} />
+    ) : monogram ? (
+      monogram.text
+    ) : (
+      <Icon name={glyph ?? 'ph:app-window'} />
+    )
+  }
+</span>
+
+<style>
+  .app-icon {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: var(--s);
+    height: var(--s);
+    overflow: hidden;
+    border-radius: calc(var(--s) * 0.2237);
+    background: var(--surface);
+    box-shadow:
+      0 0 0 0.5px rgb(0 0 0 / 0.1),
+      0 1px 3px rgb(0 0 0 / 0.08);
+  }
+
+  .app-icon :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .app-icon--mono {
+    background: var(--mono-bg);
+    color: var(--mono-fg);
+    font-weight: 700;
+    font-size: calc(var(--s) * 0.34);
+    letter-spacing: -0.02em;
+  }
+
+  .app-icon--glyph {
+    color: var(--ink-2);
+  }
+
+  .app-icon--glyph :global(svg) {
+    width: 48%;
+    height: 48%;
+  }
+</style>

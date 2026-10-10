@@ -1,0 +1,717 @@
+---
+import { base } from '../base';
+// The hero: a small, playable macOS desktop with every app in the dock.
+import Icon from '../../../components/Icon.astro';
+import Logo from './Logo.astro';
+import AppIcon from './AppIcon.astro';
+import MacWindow from './MacWindow.astro';
+import AppMock from './mocks/AppMock.astro';
+import ExploreMock from './mocks/ExploreMock.astro';
+import { apps } from '../data/apps';
+import { categories } from '../data/categories';
+
+// Where each window starts (as % of the desktop) and which ones are open on load.
+const layout: Record<string, { x: number; y: number; open?: boolean }> = {
+  maple: { x: 30, y: 3 },
+  letsrally: { x: 3, y: 5, open: true },
+  conscious: { x: 56, y: 3, open: true },
+  lingo: { x: 43, y: 4 },
+  findery: { x: 6, y: 10 },
+  explore: { x: 20, y: 12 },
+};
+const focused = 'conscious';
+const pos = (id: string) => layout[id] ?? { x: 10, y: 8 };
+---
+
+<div class="desktop" data-desktop data-focused={focused} data-base={base}>
+  <div class="wallpaper" aria-hidden="true">
+    <svg viewBox="0 0 1200 760" preserveAspectRatio="xMidYMax slice">
+      <rect width="1200" height="760" fill="var(--wp-sky)"></rect>
+      <circle cx="880" cy="250" r="92" fill="var(--wp-sun)"></circle>
+      <path d="M0 440C140 380 300 390 420 430S690 480 820 410S1080 340 1200 390V760H0Z" fill="var(--wp-1)"></path>
+      <path d="M0 530C130 480 270 470 390 510S650 590 790 530S1050 460 1200 510V760H0Z" fill="var(--wp-2)"></path>
+      <path d="M0 615C170 570 330 575 480 605S760 665 920 615S1120 575 1200 595V760H0Z" fill="var(--wp-3)"></path>
+      <path d="M0 700C220 668 420 676 600 696S980 724 1200 688V760H0Z" fill="var(--wp-4)"></path>
+    </svg>
+  </div>
+
+  <div class="menubar">
+    <div class="mb-left">
+      <span class="mb-logo" aria-hidden="true"><Logo wordmark={false} size={15} /></span>
+      <strong class="mb-app" data-active-name>Conscious</strong>
+      <span class="mb-menus" aria-hidden="true">
+        <span>File</span><span>Edit</span><span>View</span><span>Window</span><span>Help</span>
+      </span>
+    </div>
+    <div class="mb-right" aria-hidden="true">
+      <Icon name="ph:battery-high" />
+      <Icon name="ph:wifi-high" />
+      <Icon name="ph:magnifying-glass" class="mb-opt" />
+      <span class="mb-clock" data-clock>Fri 9 Oct 2:27 PM</span>
+    </div>
+  </div>
+
+  <div class="stage" data-stage>
+    <ul class="folders" role="list" aria-label="Category folders">
+      {
+        categories.map((c) => (
+          <li>
+            <button type="button" class="folder" data-open="explore" data-filter={c.slug}>
+              <span class="folder-art" aria-hidden="true">
+                <svg viewBox="0 0 52 42">
+                  <path class="back" d="M2 8a4 4 0 0 1 4-4h12.5l4 4H46a4 4 0 0 1 4 4v24a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4Z" />
+                  <path class="front" d="M2 14a4 4 0 0 1 4-4h40a4 4 0 0 1 4 4v22a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4Z" />
+                </svg>
+                <Icon name={c.icon} class="folder-glyph" />
+              </span>
+              <span class="folder-name">{c.name}</span>
+            </button>
+          </li>
+        ))
+      }
+    </ul>
+
+    {
+      apps.map((app) => (
+        <MacWindow
+          interactive
+          frame={app.frame}
+          windowId={app.slug}
+          appName={app.name}
+          title={app.window.title}
+          url={app.window.url}
+          accent={app.accent}
+          hidden={!pos(app.slug).open}
+          style={`--x:${pos(app.slug).x}%;--y:${pos(app.slug).y}%;--w:${app.window.width}px;--h:${app.window.height}px`}
+        >
+          <AppMock app={app} />
+        </MacWindow>
+      ))
+    }
+
+    <MacWindow
+      interactive
+      windowId="explore"
+      appName="Explore"
+      title="Explore"
+      hidden
+      style={`--x:${pos('explore').x}%;--y:${pos('explore').y}%;--w:580px;--h:380px`}
+    >
+      <ExploreMock />
+    </MacWindow>
+  </div>
+
+  <nav class="dock" aria-label="Dock">
+    <button type="button" class="dock-item" data-open="explore" aria-label="Open Explore">
+      <span class="dock-icon"><Logo wordmark={false} size={46} /></span>
+      <span class="dock-tip" aria-hidden="true">Explore</span>
+      <span class="dock-dot" aria-hidden="true"></span>
+    </button>
+    <span class="dock-sep" aria-hidden="true"></span>
+    {
+      apps.map((app) => (
+        <button type="button" class="dock-item" data-open={app.slug} aria-label={`Open ${app.name}`}>
+          <span class="dock-icon">
+            <AppIcon app={app} size={46} />
+          </span>
+          <span class="dock-tip" aria-hidden="true">
+            {app.name}
+          </span>
+          <span class="dock-dot" aria-hidden="true" />
+        </button>
+      ))
+    }
+  </nav>
+</div>
+
+<style>
+  .desktop {
+    --folder-back: #cbc5b8;
+    --folder-front: #dcd7cd;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    min-height: 520px;
+    max-height: 780px;
+    border-radius: clamp(16px, 2vw, 24px);
+    background: var(--wp-sky);
+    box-shadow:
+      0 0 0 1px var(--line),
+      0 40px 80px -48px rgb(20 20 19 / 0.45);
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  :global(:root[data-theme='dark']) .desktop {
+    --folder-back: #3b3934;
+    --folder-front: #4a4741;
+  }
+
+  .wallpaper,
+  .wallpaper svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ---- menu bar ---- */
+  .menubar {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    height: 30px;
+    padding: 0 16px;
+    font-family: var(--font-ui);
+    font-size: 13px;
+    color: var(--ink);
+    background: color-mix(in oklab, var(--wp-sky) 55%, transparent);
+    backdrop-filter: blur(20px) saturate(1.4);
+    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+    white-space: nowrap;
+  }
+
+  .mb-left,
+  .mb-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .mb-logo {
+    display: grid;
+  }
+
+  .mb-app {
+    font-weight: 650;
+  }
+
+  .mb-menus {
+    display: flex;
+    gap: 16px;
+  }
+
+  .mb-right {
+    gap: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .mb-right :global(.icon) {
+    width: 15px;
+    height: 15px;
+  }
+
+  /* ---- stage + windows ---- */
+  .stage {
+    position: absolute;
+    inset: 30px 0 0 0;
+    z-index: 1;
+    isolation: isolate; /* window z-indexes can never climb over the dock or menu bar */
+    container-type: size;
+  }
+
+  .stage > :global(.win) {
+    position: absolute;
+    z-index: 2; /* above the folders; focused windows get a higher one from the script */
+    left: var(--x);
+    top: var(--y);
+    /* start clear of the folder column on the right */
+    width: min(var(--w), calc(100% - var(--x) - 120px));
+    height: min(var(--h), calc(100% - 96px));
+  }
+
+  .stage > :global(.win--phone) {
+    --ph: min(var(--h), calc(100cqh - 92px));
+    height: var(--ph);
+    width: calc((var(--ph) - 40px) * 9 / 19.2);
+  }
+
+  .stage > :global(.win.is-zoomed:not(.win--phone)) {
+    left: 10px !important;
+    top: 10px !important;
+    width: calc(100% - 20px) !important;
+    height: calc(100% - 96px) !important;
+  }
+
+  .stage > :global(.win.is-dragging) {
+    cursor: grabbing;
+  }
+
+  @media (min-width: 720px) {
+    .stage :global(.win--interactive [data-drag-handle]) {
+      touch-action: none;
+    }
+  }
+
+  /* ---- category folders ---- */
+  .folders {
+    position: absolute;
+    top: 14px;
+    right: 12px;
+    z-index: 1;
+    display: grid;
+    gap: 2px;
+  }
+
+  .folder {
+    display: grid;
+    justify-items: center;
+    gap: 3px;
+    width: 86px;
+    padding: 6px 4px;
+    border-radius: 10px;
+    font-family: var(--font-ui);
+    transition: background-color 0.15s;
+  }
+
+  .folder:hover {
+    background: rgb(255 255 255 / 0.3);
+  }
+
+  :global(:root[data-theme='dark']) .folder:hover {
+    background: rgb(255 255 255 / 0.06);
+  }
+
+  .folder-art {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 38px;
+  }
+
+  .folder-art svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .folder-art .back {
+    fill: var(--folder-back);
+  }
+
+  .folder-art .front {
+    fill: var(--folder-front);
+  }
+
+  .folder-art :global(.folder-glyph) {
+    position: relative;
+    width: 15px;
+    height: 15px;
+    margin-top: 9px;
+    color: var(--ink-3);
+  }
+
+  .folder-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  /* ---- dock ---- */
+  .dock {
+    position: absolute;
+    left: 50%;
+    bottom: 10px;
+    z-index: 2;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    padding: 7px 9px;
+    translate: -50% 0;
+    border-radius: 20px;
+    background: color-mix(in oklab, var(--bg) 55%, transparent);
+    backdrop-filter: blur(22px) saturate(1.4);
+    -webkit-backdrop-filter: blur(22px) saturate(1.4);
+    box-shadow:
+      inset 0 0 0 1px rgb(255 255 255 / 0.4),
+      0 10px 30px -14px rgb(20 20 19 / 0.4);
+  }
+
+  :global(:root[data-theme='dark']) .dock {
+    box-shadow:
+      inset 0 0 0 1px rgb(255 255 255 / 0.08),
+      0 10px 30px -14px rgb(0 0 0 / 0.6);
+  }
+
+  .dock-item {
+    position: relative;
+    display: grid;
+    place-items: center;
+    border-radius: 13px;
+  }
+
+  .dock-icon {
+    display: grid;
+    transform-origin: 50% 100%;
+    transition: transform 0.22s var(--ease-spring);
+  }
+
+  .dock-item:hover .dock-icon,
+  .dock-item:focus-visible .dock-icon {
+    transform: translateY(-4px) scale(1.1);
+  }
+
+  .dock-item:active .dock-icon {
+    transform: translateY(-1px) scale(1.03);
+    transition-duration: 0.08s;
+  }
+
+  .dock-tip {
+    position: absolute;
+    bottom: calc(100% + 14px);
+    left: 50%;
+    padding: 4px 9px;
+    border-radius: 7px;
+    background: var(--ink);
+    color: var(--bg);
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    translate: -50% 4px;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 0.15s,
+      translate 0.15s;
+  }
+
+  .dock-item:hover .dock-tip,
+  .dock-item:focus-visible .dock-tip {
+    opacity: 1;
+    translate: -50% 0;
+  }
+
+  .dock-dot {
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    width: 4px;
+    height: 4px;
+    margin-left: -2px;
+    border-radius: 50%;
+    background: var(--ink);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .dock-item.is-running .dock-dot {
+    opacity: 0.7;
+  }
+
+  .dock-sep {
+    align-self: stretch;
+    width: 1px;
+    margin: 6px 2px;
+    background: var(--line-2);
+  }
+
+  /* ---- small screens: windows go full-size ---- */
+  @media (max-width: 719px) {
+    .desktop {
+      aspect-ratio: auto;
+      height: min(620px, 150vw);
+      min-height: 0;
+    }
+
+    .mb-menus,
+    .mb-right :global(.mb-opt),
+    .folders {
+      display: none;
+    }
+
+    .stage > :global(.win:not(.win--phone)) {
+      left: 8px !important;
+      top: 8px !important;
+      width: calc(100% - 16px) !important;
+      height: calc(100% - 80px) !important;
+    }
+
+    .stage > :global(.win--phone) {
+      --ph: calc(100cqh - 76px);
+      top: 6px !important;
+      left: calc((100% - (var(--ph) - 40px) * 9 / 19.2) / 2) !important;
+    }
+
+    .dock {
+      gap: 6px;
+      padding: 6px 7px;
+      border-radius: 17px;
+    }
+
+    /* the icon size is set inline, hence !important */
+    .dock-icon :global(.app-icon) {
+      --s: 38px !important;
+    }
+
+    .dock-icon :global(.logo-mark) {
+      --logo-size: 38px;
+    }
+  }
+</style>
+
+<script>
+  const clamp = (n: number, min: number, max: number) => Math.min(Math.max(n, min), max);
+
+  function initDesktop(root: HTMLElement) {
+    const stage = root.querySelector<HTMLElement>('[data-stage]');
+    if (!stage) return;
+    const wins = new Map<string, HTMLElement>();
+    stage.querySelectorAll<HTMLElement>('[data-window]').forEach((w) => wins.set(w.dataset.window!, w));
+    const activeName = root.querySelector<HTMLElement>('[data-active-name]');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const compact = window.matchMedia('(max-width: 719px)');
+    const exiting = new WeakMap<HTMLElement, Animation>();
+    const base = root.dataset.base ?? '';
+    let z = 10;
+
+    const dockButton = (id: string) => root.querySelector<HTMLElement>(`.dock [data-open="${id}"]`);
+    const visible = () => [...wins.values()].filter((w) => !w.hidden);
+
+    function syncDock() {
+      root.querySelectorAll<HTMLElement>('.dock [data-open]').forEach((btn) => {
+        const win = wins.get(btn.dataset.open!);
+        btn.classList.toggle('is-running', !!win && !win.hidden);
+      });
+    }
+
+    function focusWindow(win: HTMLElement | undefined) {
+      wins.forEach((w) => w.classList.toggle('is-active', w === win));
+      if (win) win.style.zIndex = String(++z);
+      if (activeName) activeName.textContent = win?.dataset.name ?? 'Finder';
+    }
+
+    function focusTopmost() {
+      const top = visible().sort((a, b) => Number(b.style.zIndex || 0) - Number(a.style.zIndex || 0))[0];
+      focusWindow(top);
+    }
+
+    // keep a dragged window reachable inside the stage
+    function keepInside(win: HTMLElement) {
+      if (compact.matches || win.classList.contains('is-zoomed') || !win.style.left) return;
+      const s = stage!.getBoundingClientRect();
+      win.style.left = `${clamp(win.offsetLeft, 80 - win.offsetWidth, s.width - 80)}px`;
+      win.style.top = `${clamp(win.offsetTop, 0, s.height - 50)}px`;
+    }
+
+    function flyFrom(win: HTMLElement, from: HTMLElement | null, reverse = false) {
+      if (reduceMotion.matches) {
+        return win.animate([{ opacity: reverse ? 1 : 0 }, { opacity: reverse ? 0 : 1 }], { duration: 140 });
+      }
+      const w = win.getBoundingClientRect();
+      const f = from?.getBoundingClientRect();
+      const dx = f ? f.left + f.width / 2 - (w.left + w.width / 2) : 0;
+      const dy = f ? f.top + f.height / 2 - (w.top + w.height / 2) : 60;
+      const frames: Keyframe[] = [
+        { transform: `translate(${dx}px, ${dy}px) scale(0.1)`, opacity: 0 },
+        { opacity: 1, offset: 0.3 },
+        { transform: 'none', opacity: 1 },
+      ];
+      return win.animate(reverse ? frames.reverse() : frames, {
+        duration: reverse ? 280 : 420,
+        easing: reverse ? 'cubic-bezier(.5,0,.75,0)' : 'cubic-bezier(.2,.85,.25,1)',
+      });
+    }
+
+    function setFilter(slug: string) {
+      const explore = wins.get('explore');
+      if (!explore) return;
+      let label = 'All apps';
+      explore.querySelectorAll<HTMLElement>('[data-explore-filter]').forEach((b) => {
+        const on = b.dataset.exploreFilter === slug;
+        b.setAttribute('aria-pressed', String(on));
+        if (on) label = b.dataset.label ?? label;
+      });
+      let count = 0;
+      explore.querySelectorAll<HTMLElement>('[data-cats]').forEach((li) => {
+        const show = slug === 'all' || li.dataset.cats!.split(' ').includes(slug);
+        li.hidden = !show;
+        if (show) count += 1;
+      });
+      explore.querySelectorAll<HTMLElement>('[data-explore-title]').forEach((el) => (el.textContent = label));
+      const countEl = explore.querySelector<HTMLElement>('[data-explore-count]');
+      if (countEl) countEl.textContent = `${count} app${count === 1 ? '' : 's'}`;
+      const link = explore.querySelector<HTMLAnchorElement>('[data-explore-link]');
+      if (link) link.href = slug === 'all' ? `${base}/categories/` : `${base}/categories/${slug}/`;
+    }
+
+    function open(id: string, from: HTMLElement | null, filter?: string, viaKeyboard = false) {
+      const win = wins.get(id);
+      if (!win) return;
+      if (filter) setFilter(filter);
+      // reopened while it was still closing: cancel the exit and keep it
+      const exit = exiting.get(win);
+      if (exit) {
+        exiting.delete(win);
+        exit.cancel();
+      }
+      const wasHidden = win.hidden;
+      win.hidden = false;
+      focusWindow(win);
+      if (wasHidden) {
+        keepInside(win);
+        flyFrom(win, from ?? dockButton(id));
+      }
+      syncDock();
+      if (viaKeyboard) win.focus({ preventScroll: true });
+    }
+
+    function hide(win: HTMLElement, toDock: boolean) {
+      const id = win.dataset.window!;
+      const hadFocus = win.contains(document.activeElement);
+      const animation = toDock
+        ? flyFrom(win, dockButton(id), true)
+        : reduceMotion.matches
+          ? null
+          : win.animate([{ opacity: 1 }, { opacity: 0, transform: 'scale(0.96)' }], { duration: 150, easing: 'ease-in' });
+
+      const done = () => {
+        if (animation && exiting.get(win) !== animation) return; // reopened in the meantime
+        exiting.delete(win);
+        win.hidden = true;
+        win.classList.remove('is-active');
+        syncDock();
+        focusTopmost();
+      };
+
+      if (hadFocus) dockButton(id)?.focus({ preventScroll: true });
+      if (animation) {
+        exiting.set(win, animation);
+        animation.finished.then(done, done);
+      } else {
+        done();
+      }
+    }
+
+    function toggleZoom(win: HTMLElement) {
+      if (win.dataset.frame === 'phone' || compact.matches) return;
+      const before = win.getBoundingClientRect();
+      win.classList.toggle('is-zoomed');
+      const after = win.getBoundingClientRect();
+      if (reduceMotion.matches) return;
+      win.animate(
+        [
+          {
+            transformOrigin: 'top left',
+            transform: `translate(${before.left - after.left}px, ${before.top - after.top}px) scale(${before.width / after.width}, ${before.height / after.height})`,
+          },
+          { transformOrigin: 'top left', transform: 'none' },
+        ],
+        { duration: 260, easing: 'cubic-bezier(.2,.8,.2,1)' },
+      );
+    }
+
+    // clicks: dock, folders, explore items, traffic lights, explore sidebar
+    root.addEventListener('click', (event) => {
+      const target = event.target as HTMLElement;
+      const action = target.closest<HTMLElement>('[data-action]');
+      if (action) {
+        const win = action.closest<HTMLElement>('[data-window]');
+        if (!win) return;
+        if (action.dataset.action === 'close') hide(win, false);
+        if (action.dataset.action === 'minimize') hide(win, true);
+        if (action.dataset.action === 'zoom') toggleZoom(win);
+        return;
+      }
+      const filterBtn = target.closest<HTMLElement>('[data-explore-filter]');
+      if (filterBtn) {
+        setFilter(filterBtn.dataset.exploreFilter!);
+        return;
+      }
+      const opener = target.closest<HTMLElement>('[data-open]');
+      if (opener) {
+        const fromIcon = opener.querySelector<HTMLElement>('.dock-icon, .folder-art, .app-icon') ?? opener;
+        open(opener.dataset.open!, fromIcon, opener.dataset.filter, (event as MouseEvent).detail === 0);
+      }
+    });
+
+    // focus + drag
+    stage.addEventListener('pointerdown', (event) => {
+      const target = event.target as HTMLElement;
+      const win = target.closest<HTMLElement>('[data-window]');
+      if (!win) return;
+      if (!win.classList.contains('is-active')) focusWindow(win);
+
+      const handle = target.closest<HTMLElement>('[data-drag-handle]');
+      if (!handle || event.button !== 0 || target.closest('button, a') || compact.matches) return;
+      if (win.classList.contains('is-zoomed')) return;
+
+      const s = stage.getBoundingClientRect();
+      const startX = event.clientX;
+      const startY = event.clientY;
+      const startLeft = win.offsetLeft;
+      const startTop = win.offsetTop;
+      let dragging = false;
+      handle.setPointerCapture(event.pointerId);
+
+      const move = (e: PointerEvent) => {
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        if (!dragging && Math.hypot(dx, dy) < 4) return;
+        if (!dragging) {
+          dragging = true;
+          win.classList.add('is-dragging');
+        }
+        win.style.left = `${clamp(startLeft + dx, 80 - win.offsetWidth, s.width - 80)}px`;
+        win.style.top = `${clamp(startTop + dy, 0, s.height - 50)}px`;
+      };
+      const end = () => {
+        win.classList.remove('is-dragging');
+        handle.removeEventListener('pointermove', move);
+        handle.removeEventListener('pointerup', end);
+        handle.removeEventListener('pointercancel', end);
+      };
+      handle.addEventListener('pointermove', move);
+      handle.addEventListener('pointerup', end);
+      handle.addEventListener('pointercancel', end);
+    });
+
+    stage.addEventListener('dblclick', (event) => {
+      const target = event.target as HTMLElement;
+      const handle = target.closest('[data-drag-handle]');
+      const win = target.closest<HTMLElement>('[data-window]');
+      if (handle && win && !target.closest('button, a')) toggleZoom(win);
+    });
+
+    stage.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      const win = (event.target as HTMLElement).closest<HTMLElement>('[data-window]');
+      if (win) hide(win, false);
+    });
+
+    stage.addEventListener('focusin', (event) => {
+      const win = (event.target as HTMLElement).closest<HTMLElement>('[data-window]');
+      if (win && !win.classList.contains('is-active')) focusWindow(win);
+    });
+
+    new ResizeObserver(() => wins.forEach((w) => !w.hidden && keepInside(w))).observe(stage);
+
+    // live clock in the menu bar
+    const clock = root.querySelector<HTMLElement>('[data-clock]');
+    const fmt = new Intl.DateTimeFormat(undefined, {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+    const tick = () => {
+      if (clock) clock.textContent = fmt.format(new Date()).replace(/,/g, '');
+    };
+    tick();
+    window.setInterval(tick, 20_000);
+
+    focusWindow(wins.get(root.dataset.focused ?? ''));
+    syncDock();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-desktop]').forEach(initDesktop);
+</script>

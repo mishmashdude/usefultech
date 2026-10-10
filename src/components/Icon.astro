@@ -1,0 +1,30 @@
+---
+// Inline SVG icons from the Phosphor set (https://phosphoricons.com), rendered at build time.
+// Usage: <Icon name="ph:compass-fill" />
+import { getIconData, iconToSVG } from '@iconify/utils';
+import phosphor from '@iconify-json/ph/icons.json';
+
+interface Props {
+  name: string;
+  class?: string;
+  /** accessible label; without one the icon is hidden from screen readers */
+  label?: string;
+}
+
+const { name, class: className, label } = Astro.props;
+const data = getIconData(phosphor, name.replace(/^ph:/, ''));
+if (!data) throw new Error(`Icon "${name}" not found in the Phosphor set.`);
+const { attributes, body } = iconToSVG(data);
+---
+
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox={attributes.viewBox}
+  class:list={['icon', className]}
+  fill="currentColor"
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+  focusable="false"
+  set:html={body}
+/>

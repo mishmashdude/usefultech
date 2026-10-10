@@ -1,0 +1,80 @@
+---
+import { to } from '../../../designs/v2/base';
+import type { GetStaticPaths } from 'astro';
+import Base from '../../../designs/v2/layouts/Base.astro';
+import CategoryNav from '../../../designs/v2/components/CategoryNav.astro';
+import CategoryList from '../../../designs/v2/components/CategoryList.astro';
+import AppCard from '../../../designs/v2/components/AppCard.astro';
+import { appsIn } from '../../../designs/v2/data/apps';
+import { categories, type Category } from '../../../designs/v2/data/categories';
+
+export const getStaticPaths = (() =>
+  categories.map((category) => ({ params: { slug: category.slug }, props: { category } }))) satisfies GetStaticPaths;
+
+interface Props {
+  category: Category;
+}
+
+const { category } = Astro.props;
+const list = appsIn(category.slug);
+---
+
+<Base title={category.name} description={category.description} current="categories">
+  <section class="container page-head">
+    <h1 class="title-xl rise">{category.name}</h1>
+    <p class="lede rise" style="--d: 60ms">{category.description}</p>
+    <div class="rise" style="--d: 120ms">
+      <CategoryNav current={category.slug} />
+    </div>
+  </section>
+
+  <section class="container apps" aria-label={`${category.name} apps`}>
+    <ul class="grid" role="list">
+      {
+        list.map((app, i) => (
+          <li class="rise" style={`--d:${180 + i * 60}ms`}>
+            <AppCard app={app} morph headingLevel="h2" />
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="container others" aria-labelledby="others-title">
+    <h2 id="others-title" class="eyebrow" data-reveal>Other categories</h2>
+    <div data-reveal>
+      <CategoryList exclude={category.slug} />
+    </div>
+  </section>
+</Base>
+
+<style>
+  .page-head {
+    display: grid;
+    justify-items: start;
+    gap: 16px;
+    padding-top: clamp(40px, 6vw, 80px);
+  }
+
+  .page-head > div {
+    margin-top: 12px;
+  }
+
+  .apps {
+    padding-top: clamp(36px, 5vw, 56px);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+    gap: 20px;
+  }
+
+  .others {
+    padding-block: clamp(72px, 10vw, 128px);
+  }
+
+  .others h2 {
+    margin-bottom: 16px;
+  }
+</style>

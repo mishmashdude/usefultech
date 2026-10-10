@@ -1,0 +1,68 @@
+---
+import { to } from '../base';
+import Logo from './Logo.astro';
+import { site } from '../data/site';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="container footer-row">
+    <a href={to('/')} class="footer-brand" aria-label="usefultech home"><Logo size={22} /></a>
+    <nav class="footer-links" aria-label="Footer">
+      <a href={to('/#apps')}>Apps</a>
+      <a href={to('/categories')}>Categories</a>
+      <a href={`mailto:${site.email}`}>Say hi</a>
+    </nav>
+    <p class="meta">© {year} usefultech</p>
+  </div>
+  <p class="wordmark" aria-hidden="true">usefultech</p>
+</footer>
+
+<style>
+  .footer {
+    overflow: hidden;
+    border-top: 1px solid var(--line);
+    padding-top: 28px;
+  }
+
+  .footer-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 28px;
+  }
+
+  .footer-brand {
+    border-radius: 6px;
+  }
+
+  .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 20px;
+    margin-left: auto;
+    font-size: 0.9375rem;
+  }
+
+  .footer-links a {
+    color: var(--ink-2);
+    border-radius: 4px;
+  }
+
+  .footer-links a:hover {
+    color: var(--ink);
+  }
+
+  .wordmark {
+    margin-top: clamp(40px, 6vw, 72px);
+    margin-bottom: -0.22em;
+    text-align: center;
+    font-weight: 700;
+    font-size: clamp(4rem, 20.5vw, 17.5rem);
+    line-height: 0.8;
+    letter-spacing: -0.06em;
+    color: var(--bg-2);
+    user-select: none;
+  }
+</style>

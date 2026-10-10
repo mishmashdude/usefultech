@@ -1,0 +1,41 @@
+---
+// Fallback screen for apps without a custom mock (or a screenshot) yet.
+import AppIcon from '../AppIcon.astro';
+import type { App } from '../../data/apps';
+
+interface Props {
+  app: App;
+}
+const { app } = Astro.props;
+---
+
+<div class="generic">
+  <AppIcon app={app} size={64} />
+  <p class="name">{app.name}</p>
+  <p class="tagline">{app.tagline}</p>
+</div>
+
+<style>
+  .generic {
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 0.5em;
+    height: 100%;
+    padding: 2em;
+    text-align: center;
+    background: var(--win-side);
+    color: var(--win-ink);
+  }
+
+  .name {
+    font-weight: 650;
+    font-size: 1.4em;
+    letter-spacing: -0.03em;
+  }
+
+  .tagline {
+    max-width: 20em;
+    color: var(--win-ink-2);
+  }
+</style>

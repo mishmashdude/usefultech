@@ -1,0 +1,415 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Base from '../../../designs/v1/layouts/Base.astro';
+import Icon from '../../../components/Icon.astro';
+import AppIcon from '../../../designs/v1/components/AppIcon.astro';
+import AppCard from '../../../designs/v1/components/AppCard.astro';
+import MacWindow from '../../../designs/v1/components/MacWindow.astro';
+import AppMock from '../../../designs/v1/components/mocks/AppMock.astro';
+import { apps, categoriesOf, type App } from '../../../designs/v1/data/apps';
+import { to } from '../../../designs/v1/base';
+
+export const getStaticPaths = (() => apps.map((app) => ({ params: { slug: app.slug }, props: { app } }))) satisfies GetStaticPaths;
+
+interface Props {
+  app: App;
+}
+
+const { app } = Astro.props;
+const cats = categoriesOf(app);
+const home = cats[0];
+const external = app.link.href.startsWith('http');
+// other apps: ones that share a category first
+const more = apps
+  .filter((a) => a.slug !== app.slug)
+  .sort(
+    (a, b) =>
+      Number(b.categories.some((c) => app.categories.includes(c))) -
+      Number(a.categories.some((c) => app.categories.includes(c))),
+  )
+  .slice(0, 3);
+---
+
+<Base title={app.name} description={`${app.name}: ${app.tagline}`} current="apps">
+  <section class="app-hero" data-tone={app.tone}>
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <nav class="crumbs rise" aria-label="breadcrumb">
+          <a href={to('/')}>usefultech</a>
+          <Icon name="ph:caret-right-bold" />
+          {home && <a href={to(`/categories/${home.slug}`)}>{home.name}</a>}
+          {home && <Icon name="ph:caret-right-bold" />}
+          <span aria-current="page">{app.name}</span>
+        </nav>
+
+        <div class="title-row rise" style="--d: 60ms">
+          <AppIcon app={app} size={92} morph />
+          <div>
+            <h1 class="display-1">{app.name}</h1>
+            <p class="kind">{app.kind}</p>
+          </div>
+        </div>
+
+        <p class="tagline rise" style="--d: 120ms">{app.tagline}</p>
+        <p class="lede rise" style="--d: 160ms">{app.description}</p>
+
+        <div class="actions rise" style="--d: 200ms">
+          <a
+            class="btn btn--tone"
+            href={app.link.href}
+            target={external ? '_blank' : undefined}
+            rel={external ? 'noopener' : undefined}
+          >
+            {app.link.label}
+            <Icon name="ph:arrow-up-right-bold" class="icon--nudge-out" />
+            {external && <span class="sr-only">(opens in a new tab)</span>}
+          </a>
+          <a class="btn" href={to('/categories')}>see all apps</a>
+        </div>
+
+        <dl class="facts rise" style="--d: 240ms">
+          {
+            app.maker && (
+              <div>
+                <dt>made by</dt>
+                <dd>{app.maker.name}</dd>
+              </div>
+            )
+          }
+          <div>
+            <dt>works on</dt>
+            <dd>{app.platforms.join(' + ')}</dd>
+          </div>
+          <div>
+            <dt>status</dt>
+            <dd>{app.status === 'soon' ? 'coming soon' : 'out now'}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class:list={['hero-stage', 'rise', { 'hero-stage--phone': app.frame === 'phone' }]} style="--d: 160ms">
+        <div class="stage-bg" aria-hidden="true"></div>
+        <div class="device">
+          <MacWindow frame={app.frame} title={app.window.title} url={app.window.url} appName={app.name}>
+            <AppMock app={app} />
+          </MacWindow>
+        </div>
+        <div class="toast" aria-hidden="true">
+          <span class="toast-icon"><Icon name={app.toast.icon} /></span>
+          <span class="toast-text">
+            <b>{app.toast.title}</b>
+            <small>{app.toast.text}</small>
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="why-title" data-tone={app.tone}>
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <div>
+          <p class="kicker"><Icon name="ph:sparkle-fill" />why it’s useful</p>
+          <h2 id="why-title" class="display-2">{app.highlights[0]},<br /><span class="tone-text">and then some.</span></h2>
+        </div>
+        <div class="found-in">
+          <p>you’ll find {app.name} in</p>
+          <div class="chip-row">
+            {
+              cats.map((c) => (
+                <a class="chip" data-tone={c.tone} href={to(`/categories/${c.slug}`)}>
+                  <Icon name={c.icon} />
+                  {c.name}
+                </a>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+      <ul class="feature-grid" role="list">
+        {
+          app.features.map((f, i) => (
+            <li class="feature" data-reveal style={`--d:${i * 80}ms`}>
+              <span class="feature-icon">
+                <Icon name={f.icon} />
+              </span>
+              <h3>{f.title}</h3>
+              <p>{f.body}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section--tint" aria-labelledby="more-title">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <h2 id="more-title" class="display-2">more useful<br /><span class="accent">things.</span></h2>
+        <a class="link-arrow" href={to('/categories')}>browse every category <Icon name="ph:arrow-right-bold" /></a>
+      </div>
+      <ul class="card-grid" role="list">
+        {
+          more.map((a, i) => (
+            <li data-reveal style={`--d:${i * 80}ms`}>
+              <AppCard app={a} />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .app-hero {
+    padding: clamp(28px, 5vw, 64px) 0 clamp(48px, 7vw, 96px);
+  }
+
+  .hero-grid {
+    display: grid;
+    gap: clamp(40px, 6vw, 72px);
+    align-items: center;
+  }
+
+  @media (min-width: 1000px) {
+    .hero-grid {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    }
+  }
+
+  .hero-copy {
+    display: grid;
+    gap: 22px;
+    justify-items: start;
+  }
+
+  .crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: var(--ink-3);
+  }
+
+  .crumbs a {
+    border-radius: 4px;
+  }
+
+  .crumbs a:hover {
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .crumbs :global(.icon) {
+    width: 11px;
+    height: 11px;
+  }
+
+  .crumbs [aria-current] {
+    color: var(--ink);
+  }
+
+  .title-row {
+    display: flex;
+    align-items: center;
+    gap: clamp(16px, 2.5vw, 26px);
+  }
+
+  .kind {
+    margin-top: 8px;
+    font-family: var(--font-display);
+    font-weight: 850;
+    font-size: 1.15rem;
+    color: var(--tone-text);
+  }
+
+  .tagline {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(1.6rem, 1.2rem + 1.5vw, 2.4rem);
+    line-height: 1.06;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 34px;
+    padding-top: 20px;
+    border-top: 1px dashed var(--line-2);
+  }
+
+  .facts dt {
+    font-size: 0.85rem;
+    color: var(--ink-3);
+  }
+
+  .facts dd {
+    font-family: var(--font-display);
+    font-weight: 850;
+    font-size: 1.1rem;
+  }
+
+  .hero-stage {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: clamp(460px, 50vw, 640px);
+    padding: clamp(28px, 4vw, 56px) clamp(18px, 3vw, 44px);
+  }
+
+  .stage-bg {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-xl);
+    background-color: var(--tone-soft);
+    background-image: radial-gradient(
+      color-mix(in oklab, var(--tone) 55%, transparent) 1.3px,
+      transparent 1.6px
+    );
+    background-size: 20px 20px;
+  }
+
+  .device {
+    position: relative;
+    width: 100%;
+  }
+
+  .device :global(.win:not(.win--phone)) {
+    height: clamp(380px, 38vw, 480px);
+  }
+
+  .hero-stage--phone .device {
+    width: min(300px, 76%);
+  }
+
+  .toast {
+    position: absolute;
+    left: -12px;
+    bottom: 10%;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: min(290px, 75%);
+    padding: 12px 18px 12px 12px;
+    border-radius: 18px;
+    background: var(--surface);
+    box-shadow: var(--shadow-float);
+    rotate: -2.5deg;
+    animation: float 5s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    50% {
+      translate: 0 -8px;
+    }
+  }
+
+  .toast-icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: var(--tone);
+    color: var(--tone-on);
+  }
+
+  .toast-icon :global(.icon) {
+    width: 20px;
+    height: 20px;
+  }
+
+  .toast-text {
+    display: grid;
+    line-height: 1.25;
+  }
+
+  .toast-text b {
+    font-family: var(--font-display);
+    font-weight: 850;
+  }
+
+  .toast-text small {
+    color: var(--ink-2);
+    font-size: 0.86rem;
+  }
+
+  @media (max-width: 640px) {
+    .toast {
+      left: 8px;
+      bottom: -18px;
+    }
+  }
+
+  .found-in {
+    display: grid;
+    gap: 12px;
+  }
+
+  .found-in > p {
+    color: var(--ink-2);
+  }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+    gap: 18px;
+  }
+
+  .feature {
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    padding: 26px;
+    border-radius: var(--radius-lg);
+    background: var(--tone-soft);
+    color: var(--tone-ink);
+  }
+
+  .feature-icon {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    margin-bottom: 8px;
+    border-radius: 16px;
+    background: var(--tone);
+    color: var(--tone-on);
+    box-shadow: 0 4px 0 var(--tone-deep);
+  }
+
+  .feature-icon :global(.icon) {
+    width: 26px;
+    height: 26px;
+  }
+
+  .feature h3 {
+    font-size: 1.45rem;
+    letter-spacing: -0.03em;
+  }
+
+  .feature p {
+    opacity: 0.9;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+    gap: 22px;
+  }
+</style>

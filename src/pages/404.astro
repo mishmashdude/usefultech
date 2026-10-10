@@ -1,0 +1,59 @@
+---
+// Shared 404, styled on its own so it works whichever design ends up at the root.
+import { root } from '../lib/paths';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Page not found · usefultech</title>
+    <link rel="icon" href={`${root}/favicon.svg`} type="image/svg+xml" />
+  </head>
+  <body>
+    <main>
+      <p class="code">404</p>
+      <h1>Page not found.</h1>
+      <p><a href={`${root}/`}>Back to usefultech</a></p>
+    </main>
+  </body>
+</html>
+
+<style>
+  :global(body) {
+    margin: 0;
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    background: #f5f5f3;
+    color: #111;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+
+  main {
+    display: grid;
+    gap: 14px;
+    justify-items: center;
+    padding: 24px;
+    text-align: center;
+  }
+
+  .code {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #6b6b67;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    font-weight: 650;
+    letter-spacing: -0.04em;
+  }
+
+  a {
+    color: inherit;
+    font-weight: 550;
+  }
+</style>

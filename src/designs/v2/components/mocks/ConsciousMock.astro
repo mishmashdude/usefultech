@@ -1,0 +1,494 @@
+---
+// Conscious: today's score, a timeline, app usage, and the mindful "breathing pause".
+import Icon from '../../../../components/Icon.astro';
+import ShellGlyph from '../ShellGlyph.astro';
+
+// minutes per hour (8am to 7pm); the current hour is highlighted
+const hours = [8, 14, 6, 22, 12, 26, 18, 30, 10, 16, 9, 4];
+const now = 7;
+const peak = Math.max(...hours);
+const usage = [
+  { name: 'Social', icon: 'ph:chats-teardrop', time: '48m' },
+  { name: 'Video', icon: 'ph:play', time: '31m' },
+  { name: 'News', icon: 'ph:newspaper', time: '12m' },
+];
+---
+
+<div class="conscious" data-mock="conscious">
+  <div class="screen-body">
+    <div class="head">
+      <p class="brand"><ShellGlyph />conscious</p>
+      <span class="date">Today <Icon name="ph:caret-down" /></span>
+    </div>
+
+    <div class="score" aria-hidden="true">
+      <div class="ring">
+        <svg viewBox="0 0 36 36">
+          <circle class="track" cx="18" cy="18" r="15.9155"></circle>
+          <circle class="fill" cx="18" cy="18" r="15.9155" style="stroke-dasharray: 82 100"></circle>
+        </svg>
+        <span><b>82</b><small>Score</small></span>
+      </div>
+      <dl class="stats">
+        <div><dt>Screen time</dt><dd>2h 14m</dd></div>
+        <div><dt>Pickups</dt><dd>41</dd></div>
+      </dl>
+    </div>
+
+    <div class="card" aria-hidden="true">
+      <p class="card-title">Timeline</p>
+      <div class="bars">
+        {hours.map((m, i) => <span class:list={['bar', { 'is-now': i === now }]} style={`height:${Math.round((m / peak) * 100)}%`} />)}
+      </div>
+    </div>
+
+    <div class="card usage">
+      <p class="card-title">App usage <span>Tap one</span></p>
+      <ul role="list">
+        {
+          usage.map((u) => (
+            <li>
+              <button type="button" class="app-row" data-try={u.name}>
+                <span class="app-ico">
+                  <Icon name={u.icon} />
+                </span>
+                <span class="app-name">{u.name}</span>
+                <span class="app-time">{u.time}</span>
+                <Icon name="ph:caret-right" class="chev" />
+              </button>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+
+  <nav class="tabbar" aria-hidden="true">
+    <span class="tab is-on"><Icon name="ph:sun" />Today</span>
+    <span class="tab"><Icon name="ph:chart-bar" />Insights</span>
+    <span class="tab"><Icon name="ph:sliders-horizontal" />Controls</span>
+    <span class="tab"><Icon name="ph:gear-six" />Settings</span>
+  </nav>
+
+  <div class="gate" data-gate hidden role="dialog" aria-modal="true" aria-label="Breathing pause">
+    <p class="gate-kicker">Opening <b data-gate-app>Social</b></p>
+    <div class="breath" aria-hidden="true">
+      <span class="breath-ring"></span>
+      <span class="breath-count" data-gate-count>15</span>
+    </div>
+    <p class="gate-title">Take a breath.</p>
+    <p class="gate-sub">Is this what you meant to do?</p>
+    <button type="button" class="m-btn gate-skip" data-gate-skip>Don’t open</button>
+    <button type="button" class="gate-open" data-gate-open disabled>Open in 15s</button>
+  </div>
+  <p class="m-toast" data-gate-note hidden><Icon name="ph:check" />Skipped</p>
+</div>
+
+<style>
+  .conscious {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--win-bg);
+    color: var(--win-ink);
+    overflow: hidden;
+  }
+
+  .screen-body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8em;
+    padding: 3.3em 1.15em 0.6em;
+  }
+
+  .head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    font-weight: 700;
+    font-size: 1.35em;
+    letter-spacing: -0.03em;
+  }
+
+  .brand :global(.shell-glyph) {
+    width: 1.05em;
+    height: 1.05em;
+    color: var(--accent);
+    --glyph-detail: var(--win-bg);
+  }
+
+  .date {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+    padding: 0.3em 0.7em;
+    border-radius: 999px;
+    background: var(--win-field);
+    font-size: 0.82em;
+    font-weight: 550;
+  }
+
+  .date :global(.icon) {
+    width: 0.9em;
+    height: 0.9em;
+  }
+
+  /* score ring + stats */
+  .score {
+    display: flex;
+    align-items: center;
+    gap: 1.1em;
+    padding: 0.9em;
+    border-radius: 1em;
+    background: var(--win-side);
+  }
+
+  .ring {
+    position: relative;
+    flex: none;
+    width: 5em;
+    height: 5em;
+  }
+
+  .ring svg {
+    width: 100%;
+    height: 100%;
+    rotate: -90deg;
+  }
+
+  .ring circle {
+    fill: none;
+    stroke-width: 3.2;
+  }
+
+  .ring .track {
+    stroke: var(--win-line);
+    stroke: color-mix(in oklab, var(--win-ink) 10%, transparent);
+  }
+
+  .ring .fill {
+    stroke: var(--accent);
+    stroke-linecap: round;
+  }
+
+  .ring span {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    text-align: center;
+    line-height: 1.05;
+  }
+
+  .ring b {
+    font-size: 1.35em;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+
+  .ring small,
+  .stats dt {
+    font-size: 0.72em;
+    color: var(--win-ink-2);
+  }
+
+  .stats {
+    display: grid;
+    gap: 0.5em;
+  }
+
+  .stats dd {
+    font-weight: 650;
+    font-size: 1.1em;
+    letter-spacing: -0.02em;
+  }
+
+  /* cards */
+  .card {
+    padding: 0.75em 0.85em;
+    border-radius: 1em;
+    background: var(--win-side);
+  }
+
+  .card-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5em;
+    font-size: 0.85em;
+    font-weight: 650;
+  }
+
+  .card-title span {
+    font-weight: 500;
+    color: var(--win-ink-2);
+  }
+
+  .bars {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 0.3em;
+    align-items: end;
+    height: 3.2em;
+  }
+
+  .bar {
+    display: block;
+    min-height: 0.2em;
+    border-radius: 0.2em;
+    background: color-mix(in oklab, var(--win-ink) 16%, transparent);
+  }
+
+  .bar.is-now {
+    background: var(--accent);
+  }
+
+  .usage ul {
+    display: grid;
+    gap: 0.1em;
+  }
+
+  .app-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: 0.6em;
+    width: 100%;
+    padding: 0.35em 0.25em;
+    border-radius: 0.6em;
+    text-align: left;
+    transition: background-color 0.15s;
+  }
+
+  .app-row:hover {
+    background: var(--win-hover);
+  }
+
+  .app-ico {
+    display: grid;
+    place-items: center;
+    width: 1.9em;
+    height: 1.9em;
+    border-radius: 0.55em;
+    background: var(--win-bg);
+    box-shadow: inset 0 0 0 1px var(--win-line);
+  }
+
+  .app-ico :global(.icon) {
+    width: 1.05em;
+    height: 1.05em;
+  }
+
+  .app-name {
+    font-weight: 550;
+  }
+
+  .app-time {
+    font-size: 0.85em;
+    color: var(--win-ink-2);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .app-row :global(.chev) {
+    width: 0.8em;
+    height: 0.8em;
+    color: var(--win-ink-2);
+  }
+
+  /* tab bar */
+  .tabbar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    padding: 0.55em 0.6em 1.6em;
+    border-top: 1px solid var(--win-line);
+  }
+
+  .tab {
+    display: grid;
+    justify-items: center;
+    gap: 0.15em;
+    font-size: 0.66em;
+    font-weight: 550;
+    color: var(--win-ink-2);
+  }
+
+  .tab :global(.icon) {
+    width: 1.9em;
+    height: 1.9em;
+  }
+
+  .tab.is-on {
+    color: var(--accent);
+  }
+
+  /* the breathing pause */
+  .gate {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55em;
+    padding: 2em 1.6em;
+    text-align: center;
+    background: var(--win-bg);
+    animation: gate-in 0.3s var(--ease) both;
+  }
+
+  @keyframes gate-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  .gate-kicker {
+    font-size: 0.85em;
+    color: var(--win-ink-2);
+  }
+
+  .gate-kicker b {
+    color: var(--win-ink);
+    font-weight: 600;
+  }
+
+  .breath {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 8em;
+    height: 8em;
+    margin: 0.8em 0;
+  }
+
+  .breath-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    box-shadow: inset 0 0 0 0.12em var(--accent);
+    animation: breathe 4s ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+    0%,
+    100% {
+      transform: scale(0.7);
+    }
+    50% {
+      transform: scale(1);
+    }
+  }
+
+  .breath-count {
+    position: relative;
+    font-weight: 650;
+    font-size: 2em;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .gate-title {
+    font-weight: 700;
+    font-size: 1.4em;
+    letter-spacing: -0.03em;
+  }
+
+  .gate-sub {
+    font-size: 0.85em;
+    color: var(--win-ink-2);
+    margin-bottom: 0.6em;
+  }
+
+  .gate-skip {
+    width: 100%;
+  }
+
+  .gate-open {
+    padding: 0.5em;
+    font-size: 0.85em;
+    font-weight: 550;
+    color: var(--win-ink-2);
+  }
+
+  .gate-open:disabled {
+    opacity: 0.55;
+    cursor: default;
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-mock="conscious"]').forEach((root) => {
+    const gate = root.querySelector<HTMLElement>('[data-gate]');
+    const count = root.querySelector<HTMLElement>('[data-gate-count]');
+    const appName = root.querySelector<HTMLElement>('[data-gate-app]');
+    const skip = root.querySelector<HTMLButtonElement>('[data-gate-skip]');
+    const open = root.querySelector<HTMLButtonElement>('[data-gate-open]');
+    const note = root.querySelector<HTMLElement>('[data-gate-note]');
+    const behind = root.querySelectorAll<HTMLElement>('.screen-body, .tabbar');
+    if (!gate || !count || !appName || !skip || !open || !note) return;
+
+    let timer: number | undefined;
+    let noteTimer: number | undefined;
+    let opener: HTMLElement | null = null;
+
+    const close = (skipped: boolean) => {
+      window.clearInterval(timer);
+      const hadFocus = gate.contains(document.activeElement);
+      gate.hidden = true;
+      behind.forEach((el) => (el.inert = false));
+      if (hadFocus) opener?.focus({ preventScroll: true });
+      if (skipped) {
+        note.hidden = false;
+        window.clearTimeout(noteTimer);
+        noteTimer = window.setTimeout(() => (note.hidden = true), 1800);
+      }
+    };
+
+    root.querySelectorAll<HTMLButtonElement>('[data-try]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        let left = 15;
+        opener = btn;
+        appName.textContent = btn.dataset.try ?? 'this app';
+        count.textContent = String(left);
+        open.disabled = true;
+        open.textContent = `Open in ${left}s`;
+        note.hidden = true;
+        gate.hidden = false;
+        behind.forEach((el) => (el.inert = true));
+        skip.focus({ preventScroll: true });
+        window.clearInterval(timer);
+        timer = window.setInterval(() => {
+          left -= 1;
+          count.textContent = String(Math.max(left, 0));
+          if (left <= 0) {
+            window.clearInterval(timer);
+            open.disabled = false;
+            open.textContent = 'Open anyway';
+          } else {
+            open.textContent = `Open in ${left}s`;
+          }
+        }, 1000);
+      });
+    });
+
+    skip.addEventListener('click', () => close(true));
+    open.addEventListener('click', () => close(false));
+    gate.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        event.stopPropagation();
+        close(true);
+      }
+    });
+  });
+</script>

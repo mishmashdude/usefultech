@@ -1,0 +1,125 @@
+---
+// Categories as an editorial index: number, name, the apps inside.
+import Icon from '../../../components/Icon.astro';
+import AppIcon from './AppIcon.astro';
+import { appsIn } from '../data/apps';
+import { categories } from '../data/categories';
+import { to } from '../base';
+
+interface Props {
+  /** leave one category out (e.g. the one you're on) */
+  exclude?: string;
+}
+const { exclude } = Astro.props;
+const shown = categories.filter((c) => c.slug !== exclude);
+---
+
+<ol class="index" role="list">
+  {
+    shown.map((c) => {
+      const list = appsIn(c.slug);
+      const n = categories.indexOf(c) + 1;
+      return (
+        <li>
+          <a class="row" href={to(`/categories/${c.slug}`)}>
+            <span class="num">{String(n).padStart(2, '0')}</span>
+            <span class="name">{c.name}</span>
+            <span class="apps">{list.map((a) => a.name).join(', ')}</span>
+            <span class="icons">
+              {list.map((a) => (
+                <AppIcon app={a} size={30} />
+              ))}
+            </span>
+            <span class="arrow">
+              <Icon name="ph:arrow-up-right" />
+            </span>
+          </a>
+        </li>
+      );
+    })
+  }
+</ol>
+
+<style>
+  .index {
+    border-top: 1px solid var(--line-2);
+  }
+
+  .index li {
+    border-bottom: 1px solid var(--line-2);
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) minmax(0, 1fr) 100px 44px;
+    align-items: center;
+    gap: 16px;
+    padding: 22px 4px;
+    transition: padding 0.4s var(--ease);
+  }
+
+  .row:hover {
+    padding-left: 14px;
+  }
+
+  .num {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .name {
+    font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.6rem);
+    font-weight: 600;
+    letter-spacing: -0.045em;
+    line-height: 1;
+  }
+
+  .apps {
+    color: var(--ink-3);
+    font-size: 0.9375rem;
+  }
+
+  .icons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+
+  .arrow {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--stage);
+    transition:
+      background-color 0.3s,
+      color 0.3s,
+      transform 0.4s var(--ease);
+  }
+
+  .arrow :global(.icon) {
+    width: 16px;
+    height: 16px;
+  }
+
+  .row:hover .arrow {
+    background: var(--ink);
+    color: var(--bg);
+    transform: rotate(45deg);
+  }
+
+  @media (max-width: 760px) {
+    .row {
+      grid-template-columns: 34px minmax(0, 1fr) auto 40px;
+      padding: 18px 2px;
+    }
+
+    .apps {
+      display: none;
+    }
+  }
+</style>

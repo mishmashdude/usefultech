@@ -1,0 +1,430 @@
+---
+// maple: a shared trip map with pins + a day-by-day itinerary sheet.
+import Icon from '../../../../components/Icon.astro';
+
+const days = [
+  {
+    label: 'sat',
+    date: '12',
+    city: 'tokyo',
+    stops: [
+      { name: 'tsukiji outer market', meta: 'breakfast · 8:30', icon: 'ph:fork-knife-fill', tone: 'butter', pin: [64, 56] },
+      { name: 'teamlab planets', meta: 'tickets saved · 11:00', icon: 'ph:ticket-fill', tone: 'lilac', pin: [78, 70] },
+      { name: 'shibuya sky', meta: 'sunset · 17:20', icon: 'ph:sun-horizon-fill', tone: 'pink', pin: [28, 62] },
+    ],
+  },
+  {
+    label: 'sun',
+    date: '13',
+    city: 'tokyo',
+    stops: [
+      { name: 'senso-ji', meta: 'go early, beat the crowds', icon: 'ph:camera-fill', tone: 'pink', pin: [72, 30] },
+      { name: 'ueno park', meta: 'picnic · 12:00', icon: 'ph:tree-fill', tone: 'mint', pin: [54, 24] },
+      { name: 'golden gai', meta: 'drinks · 20:00', icon: 'ph:wine-fill', tone: 'butter', pin: [24, 44] },
+    ],
+  },
+  {
+    label: 'mon',
+    date: '14',
+    city: 'kyoto',
+    stops: [
+      { name: 'shinkansen to kyoto', meta: 'tokyo station · 9:03', icon: 'ph:train-fill', tone: 'sky', pin: [82, 46] },
+      { name: 'nishiki market', meta: 'lunch · 12:30', icon: 'ph:bowl-food-fill', tone: 'butter', pin: [46, 50] },
+      { name: 'fushimi inari', meta: 'noor’s pick · 16:00', icon: 'ph:mountains-fill', tone: 'pink', pin: [58, 76] },
+    ],
+  },
+];
+---
+
+<div class="maple" data-mock="maple" data-tone="sky">
+  <div class="map" aria-hidden="true">
+    <svg class="map-art" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
+      <rect width="100" height="100" fill="var(--map-land)"></rect>
+      <rect x="8" y="10" width="20" height="13" rx="3" fill="var(--map-park)"></rect>
+      <rect x="62" y="14" width="16" height="11" rx="3" fill="var(--map-park)"></rect>
+      <path d="M0 33c18 3 30 12 46 10s30 9 54 3" fill="none" stroke="var(--map-water)" stroke-width="4.5"
+      ></path>
+      <path d="M58 100c4-12 14-19 42-22v22Z" fill="var(--map-water)"></path>
+      <g fill="none" stroke="var(--map-road)" stroke-linecap="round">
+        <path d="M0 60 100 51" stroke-width="2.6"></path>
+        <path d="M40 0 47 100" stroke-width="2.6"></path>
+        <path d="M0 84c26-7 46 7 70 0" stroke-width="2"></path>
+        <path d="M74 0c-3 20 2 30 10 52" stroke-width="2"></path>
+      </g>
+      <g fill="none" stroke="var(--map-road-2)" stroke-width="0.9">
+        <path d="M0 72h40M47 70h53M14 0v100M28 40v60M60 26v30M88 56v44M0 20h40M47 38h53"></path>
+      </g>
+    </svg>
+    {
+      days.map((d, i) => (
+        <div class="pins" data-day={i} hidden={i !== 0}>
+          <svg class="route" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <polyline points={d.stops.map((s) => s.pin.join(',')).join(' ')} />
+          </svg>
+          {d.stops.map((s, n) => (
+            <span
+              class="pin"
+              data-tone={s.tone}
+              data-pin={`${i}-${n}`}
+              style={`left:${s.pin[0]}%;top:${s.pin[1]}%`}
+            >
+              <Icon name={s.icon} />
+            </span>
+          ))}
+        </div>
+      ))
+    }
+  </div>
+
+  <div class="topbar" aria-hidden="true">
+    <span class="round"><Icon name="ph:caret-left-bold" /></span>
+    <span class="trip">
+      <b>japan trip</b>
+      <small data-city>tokyo · oct 12 – 24</small>
+    </span>
+    <span class="avatars">
+      <i style="--c: var(--pink)">n</i>
+      <i style="--c: var(--butter)">j</i>
+      <i style="--c: var(--mint)">a</i>
+    </span>
+  </div>
+
+  <div class="sheet">
+    <span class="grabber" aria-hidden="true"></span>
+    <div class="sheet-head">
+      <p><b>itinerary</b><small>4 people planning</small></p>
+      <span class="m-btn add" aria-hidden="true"><Icon name="ph:plus-bold" />add</span>
+    </div>
+    <div class="days" role="group" aria-label="trip days">
+      {
+        days.map((d, i) => (
+          <button
+            type="button"
+            class="m-pill day"
+            aria-pressed={i === 0 ? 'true' : 'false'}
+            data-day-tab={i}
+            data-city={d.city}
+          >
+            <small>{d.label}</small>
+            {d.date}
+          </button>
+        ))
+      }
+    </div>
+    {
+      days.map((d, i) => (
+        <ol class="stops" role="list" data-day={i} hidden={i !== 0}>
+          {d.stops.map((s, n) => (
+            <li>
+              <button type="button" class="stop" data-stop={`${i}-${n}`}>
+                <span class="num" data-tone={s.tone}>
+                  {n + 1}
+                </span>
+                <span class="txt">
+                  <b>{s.name}</b>
+                  <small>{s.meta}</small>
+                </span>
+                <Icon name={s.icon} class="kind" />
+              </button>
+            </li>
+          ))}
+        </ol>
+      ))
+    }
+    <p class="activity" aria-hidden="true">
+      <i style="--c: var(--pink)">n</i><span>noor added <b>fushimi inari</b> · 2m</span>
+    </p>
+  </div>
+</div>
+
+<style>
+  .maple {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+    background: var(--map-land);
+  }
+
+  .map {
+    position: absolute;
+    inset: 0 0 46% 0;
+  }
+
+  .map-art,
+  .route {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .pins {
+    position: absolute;
+    inset: 0;
+  }
+
+  .route polyline {
+    fill: none;
+    stroke: var(--sky-deep);
+    stroke-width: 2;
+    stroke-dasharray: 3 4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .pin {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: 2.2em;
+    height: 2.2em;
+    translate: -50% -50%;
+    border-radius: 50%;
+    background: var(--tone);
+    color: var(--tone-on);
+    border: 0.18em solid #fff;
+    box-shadow: 0 0.2em 0 var(--tone-deep), 0 0.4em 0.8em rgb(0 0 0 / 0.18);
+    transition: scale 0.25s var(--ease-spring);
+  }
+
+  .pin :global(.icon) {
+    width: 1.1em;
+    height: 1.1em;
+  }
+
+  .pin.is-focus {
+    scale: 1.35;
+    z-index: 2;
+  }
+
+  .topbar {
+    position: absolute;
+    top: 3.4em;
+    left: 0.9em;
+    right: 0.9em;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+  }
+
+  .round,
+  .trip {
+    background: var(--win-bg);
+    box-shadow: 0 0.15em 0.6em rgb(0 0 0 / 0.14);
+  }
+
+  .round {
+    display: grid;
+    place-items: center;
+    width: 2.4em;
+    height: 2.4em;
+    border-radius: 50%;
+  }
+
+  .round :global(.icon) {
+    width: 1em;
+    height: 1em;
+  }
+
+  .trip {
+    flex: 1;
+    display: grid;
+    padding: 0.35em 0.9em;
+    border-radius: 1.2em;
+    line-height: 1.2;
+  }
+
+  .trip b {
+    font-weight: 750;
+  }
+
+  .trip small,
+  .sheet-head small,
+  .stop small {
+    font-size: 0.78em;
+    color: var(--win-ink-2);
+  }
+
+  .avatars {
+    display: flex;
+  }
+
+  .avatars i,
+  .activity i {
+    display: grid;
+    place-items: center;
+    width: 1.8em;
+    height: 1.8em;
+    margin-left: -0.5em;
+    border-radius: 50%;
+    border: 0.15em solid var(--win-bg);
+    background: var(--c);
+    color: #1f1c17;
+    font-style: normal;
+    font-weight: 750;
+    font-size: 0.8em;
+  }
+
+  .sheet {
+    position: absolute;
+    inset: auto 0 0;
+    height: 56%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6em;
+    padding: 0.5em 1em 1.2em;
+    border-radius: 1.5em 1.5em 0 0;
+    background: var(--win-bg);
+    box-shadow: 0 -0.3em 1.2em rgb(0 0 0 / 0.12);
+  }
+
+  .grabber {
+    align-self: center;
+    width: 2.6em;
+    height: 0.3em;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--win-ink) 18%, transparent);
+  }
+
+  .sheet-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .sheet-head p {
+    display: grid;
+    line-height: 1.15;
+  }
+
+  .sheet-head b {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 1.35em;
+    letter-spacing: -0.03em;
+  }
+
+  .add {
+    height: 2em;
+    padding: 0 0.75em;
+    font-size: 0.9em;
+  }
+
+  .days {
+    display: flex;
+    gap: 0.4em;
+  }
+
+  .day {
+    height: 2.1em;
+    font-size: 0.92em;
+  }
+
+  .day small {
+    font-weight: 500;
+    opacity: 0.8;
+  }
+
+  .stops {
+    display: grid;
+    gap: 0.1em;
+  }
+
+  .stop {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0.65em;
+    width: 100%;
+    padding: 0.35em 0.3em;
+    border-radius: 0.8em;
+    text-align: left;
+    transition: background-color 0.15s;
+  }
+
+  .stop:hover {
+    background: var(--win-side);
+  }
+
+  .num {
+    display: grid;
+    place-items: center;
+    width: 1.8em;
+    height: 1.8em;
+    border-radius: 50%;
+    background: var(--tone);
+    color: var(--tone-on);
+    font-weight: 800;
+    font-size: 0.9em;
+  }
+
+  .txt {
+    display: grid;
+    line-height: 1.2;
+    min-width: 0;
+  }
+
+  .txt b {
+    font-weight: 650;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .stop :global(.kind) {
+    width: 1.1em;
+    height: 1.1em;
+    color: var(--win-ink-2);
+  }
+
+  .activity {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin-top: auto;
+    padding: 0.5em 0.7em 0.5em 1em;
+    border-radius: 999px;
+    background: var(--sky-soft);
+    color: var(--sky-ink);
+    font-size: 0.82em;
+  }
+
+  .activity i {
+    margin-left: -0.4em;
+    flex: none;
+  }
+
+  .activity span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-mock="maple"]').forEach((root) => {
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[data-day-tab]')];
+    const city = root.querySelector<HTMLElement>('[data-city]');
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const day = tab.dataset.dayTab;
+        tabs.forEach((t) => t.setAttribute('aria-pressed', String(t === tab)));
+        root.querySelectorAll<HTMLElement>('[data-day]').forEach((el) => {
+          el.hidden = el.dataset.day !== day;
+        });
+        root.querySelectorAll('.pin.is-focus').forEach((p) => p.classList.remove('is-focus'));
+        if (city) city.textContent = `${tab.dataset.city} · oct 12 – 24`;
+      });
+    });
+
+    root.querySelectorAll<HTMLButtonElement>('[data-stop]').forEach((stop) => {
+      stop.addEventListener('click', () => {
+        root.querySelectorAll<HTMLElement>('.pin').forEach((pin) => {
+          pin.classList.toggle('is-focus', pin.dataset.pin === stop.dataset.stop && !pin.classList.contains('is-focus'));
+        });
+      });
+    });
+  });
+</script>

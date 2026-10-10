@@ -1,0 +1,72 @@
+---
+import { site } from '../data/site';
+import { to } from '../base';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-card">
+      <div class="row">
+        <p class="label">usefultech · {year}</p>
+        <nav class="links" aria-label="Footer">
+          <a href={to('/#apps')}>Apps</a>
+          <a href={to('/categories')}>Categories</a>
+          <a href={`mailto:${site.email}`}>Say hi</a>
+        </nav>
+      </div>
+      <p class="wordmark" aria-hidden="true">usefultech</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    padding-bottom: var(--gutter);
+  }
+
+  .footer-card {
+    overflow: hidden;
+    border-radius: var(--r-card);
+    background: var(--stage);
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 24px;
+    padding: 26px 28px 0;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 22px;
+    font-size: 0.9375rem;
+  }
+
+  .links a {
+    color: var(--ink-2);
+    border-radius: 4px;
+    transition: color 0.15s;
+  }
+
+  .links a:hover {
+    color: var(--ink);
+  }
+
+  .wordmark {
+    margin: clamp(28px, 6vw, 64px) 0 -0.2em;
+    padding: 0 18px;
+    font-size: clamp(3.6rem, 18.5vw, 15.5rem);
+    font-weight: 600;
+    line-height: 0.82;
+    letter-spacing: -0.065em;
+    text-align: center;
+    color: var(--stage-2);
+    user-select: none;
+  }
+</style>

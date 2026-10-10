@@ -1,0 +1,123 @@
+---
+// One real screenshot, served as responsive WebP.
+//   phone   – a raw iPhone screen with screen-shaped corners
+//   store   – an App Store image (it already has its own background and caption)
+//   browser – a website capture under a quiet, monochrome window bar
+import { Image } from 'astro:assets';
+import Icon from '../../../components/Icon.astro';
+import type { Shot } from '../data/apps';
+
+interface Props {
+  shot: Shot;
+  /** the address for browser captures */
+  url?: string;
+  sizes?: string;
+  class?: string;
+  eager?: boolean;
+}
+
+const { shot, url, sizes, class: className, eager = false } = Astro.props;
+const steps = shot.kind === 'browser' ? [640, 960, 1280, 1680, 2400] : [240, 360, 480, 640, 886];
+const widths = [...steps.filter((w) => w < shot.src.width), shot.src.width];
+const fallbackSizes = shot.kind === 'browser' ? '(min-width: 1000px) 820px, 100vw' : '(min-width: 1000px) 300px, 60vw';
+---
+
+<figure class:list={['screen', `screen--${shot.kind}`, className]}>
+  {
+    shot.kind === 'browser' && (
+      <div class="bar" aria-hidden="true">
+        <span class="dots">
+          <i />
+          <i />
+          <i />
+        </span>
+        <span class="url">
+          <Icon name="ph:lock-simple-fill" />
+          {url}
+        </span>
+      </div>
+    )
+  }
+  <Image
+    src={shot.src}
+    alt={shot.alt}
+    widths={widths}
+    sizes={sizes ?? fallbackSizes}
+    loading={eager ? 'eager' : 'lazy'}
+    fetchpriority={eager ? 'high' : undefined}
+  />
+</figure>
+
+<style>
+  .screen {
+    margin: 0;
+    container-type: inline-size;
+  }
+
+  .screen :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .screen--phone :global(img) {
+    border-radius: 12.5cqw;
+    background: #000;
+    box-shadow: var(--shot-shadow);
+  }
+
+  .screen--store :global(img) {
+    border-radius: 7cqw;
+    box-shadow: var(--shot-shadow);
+  }
+
+  .screen--browser {
+    overflow: hidden;
+    border-radius: 16px;
+    background: var(--surface);
+    box-shadow: var(--shot-shadow);
+  }
+
+  .bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 36px;
+    padding: 0 14px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .dots {
+    display: flex;
+    gap: 7px;
+  }
+
+  .dots i {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--stage-2);
+  }
+
+  .url {
+    position: absolute;
+    left: 50%;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 22px;
+    padding: 0 12px;
+    translate: -50% 0;
+    border-radius: 999px;
+    background: var(--stage);
+    color: var(--ink-3);
+    font-size: 11.5px;
+    white-space: nowrap;
+  }
+
+  .url :global(.icon) {
+    width: 10px;
+    height: 10px;
+  }
+</style>

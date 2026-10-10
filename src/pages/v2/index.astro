@@ -1,0 +1,187 @@
+---
+import { to } from '../../designs/v2/base';
+import Base from '../../designs/v2/layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import MacDesktop from '../../designs/v2/components/MacDesktop.astro';
+import AppCard from '../../designs/v2/components/AppCard.astro';
+import CategoryList from '../../designs/v2/components/CategoryList.astro';
+import { apps } from '../../designs/v2/data/apps';
+import { site } from '../../designs/v2/data/site';
+
+const phones = apps.filter((a) => a.frame === 'phone');
+const others = apps.filter((a) => a.frame !== 'phone');
+---
+
+<Base current="home">
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="container hero-copy">
+      <p class="eyebrow rise">{apps.length} apps · made by friends</p>
+      <h1 id="hero-title" class="title-xl rise" style="--d: 60ms">
+        Tech that’s <span class="muted">actually useful.</span>
+      </h1>
+      <p class="lede rise" style="--d: 120ms">Small, independent apps for everyday life.</p>
+      <div class="actions rise" style="--d: 180ms">
+        <a class="btn btn--primary" href="#apps">Browse apps</a>
+        <a class="btn" href={to('/categories')}>Categories</a>
+      </div>
+    </div>
+
+    <div class="container desktop-wrap rise" style="--d: 260ms">
+      <MacDesktop />
+      <p class="caption">
+        <Icon name="ph:cursor-click" />
+        <span class="hint-wide">Try it: open apps from the dock, drag the windows.</span>
+        <span class="hint-narrow">Try it: tap an app in the dock.</span>
+      </p>
+    </div>
+  </section>
+
+  <section class="section" id="apps" aria-labelledby="apps-title">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <h2 id="apps-title" class="title-lg">Apps</h2>
+        <a class="link" href={to('/categories')}>By category <Icon name="ph:arrow-right" /></a>
+      </div>
+      <ul class="grid grid--3" role="list">
+        {
+          phones.map((app, i) => (
+            <li data-reveal style={`--d:${i * 60}ms`}>
+              <AppCard app={app} morph />
+            </li>
+          ))
+        }
+      </ul>
+      <ul class="grid grid--2" role="list">
+        {
+          others.map((app, i) => (
+            <li data-reveal style={`--d:${i * 60}ms`}>
+              <AppCard app={app} morph />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section--line" id="categories" aria-labelledby="cat-title">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <h2 id="cat-title" class="title-lg">Categories</h2>
+      </div>
+      <div data-reveal>
+        <CategoryList />
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--line" id="about" aria-labelledby="about-title">
+    <div class="container about" data-reveal>
+      <h2 id="about-title" class="eyebrow">About</h2>
+      <p class="statement">
+        usefultech is a small collective of independent apps. <span class="muted"
+          >Each one is built by the friend who needed it.</span
+        >
+      </p>
+      <a class="link" href={`mailto:${site.email}`}>Say hi <Icon name="ph:arrow-right" /></a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    padding-top: clamp(40px, 7vw, 88px);
+  }
+
+  .hero-copy {
+    display: grid;
+    justify-items: center;
+    gap: 18px;
+    text-align: center;
+  }
+
+  .hero-copy .lede {
+    max-width: 30em;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .desktop-wrap {
+    margin-top: clamp(44px, 6vw, 72px);
+  }
+
+  .caption {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 18px;
+    font-size: 0.875rem;
+    color: var(--ink-3);
+  }
+
+  .caption :global(.icon) {
+    width: 16px;
+    height: 16px;
+  }
+
+  .hint-narrow {
+    display: none;
+  }
+
+  @media (max-width: 719px) {
+    .hint-wide {
+      display: none;
+    }
+
+    .hint-narrow {
+      display: inline;
+    }
+  }
+
+  .section--line {
+    border-top: 1px solid var(--line);
+  }
+
+  .grid {
+    display: grid;
+    gap: 20px;
+  }
+
+  .grid + .grid {
+    margin-top: 20px;
+  }
+
+  @media (min-width: 640px) {
+    .grid--3,
+    .grid--2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 960px) {
+    .grid--3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .about {
+    display: grid;
+    justify-items: start;
+    gap: 20px;
+  }
+
+  .statement {
+    max-width: 22em;
+    font-size: clamp(1.6rem, 1.1rem + 1.9vw, 2.6rem);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+</style>

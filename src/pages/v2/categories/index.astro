@@ -1,0 +1,88 @@
+---
+import { to } from '../../../designs/v2/base';
+import Base from '../../../designs/v2/layouts/Base.astro';
+import Icon from '../../../components/Icon.astro';
+import CategoryNav from '../../../designs/v2/components/CategoryNav.astro';
+import AppCard from '../../../designs/v2/components/AppCard.astro';
+import { appsIn } from '../../../designs/v2/data/apps';
+import { categories } from '../../../designs/v2/data/categories';
+---
+
+<Base title="Categories" description="Browse usefultech apps by category." current="categories">
+  <section class="container page-head">
+    <h1 class="title-xl rise">Categories</h1>
+    <p class="lede rise" style="--d: 60ms">Browse apps by what you need.</p>
+    <div class="rise" style="--d: 120ms">
+      <CategoryNav current="all" />
+    </div>
+  </section>
+
+  {
+    categories.map((c) => (
+      <section class="container cat" id={c.slug} aria-labelledby={`${c.slug}-title`}>
+        <div class="cat-head" data-reveal>
+          <h2 id={`${c.slug}-title`}>{c.name}</h2>
+          <p class="meta">{c.description}</p>
+          <a class="link" href={to(`/categories/${c.slug}`)}>
+            View <Icon name="ph:arrow-right" />
+          </a>
+        </div>
+        <ul class="grid" role="list">
+          {appsIn(c.slug).map((app) => (
+            <li data-reveal>
+              <AppCard app={app} />
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+  <div class="end"></div>
+</Base>
+
+<style>
+  .page-head {
+    display: grid;
+    justify-items: start;
+    gap: 16px;
+    padding-top: clamp(40px, 6vw, 80px);
+  }
+
+  .page-head > div {
+    margin-top: 12px;
+  }
+
+  .cat {
+    padding-top: clamp(56px, 7vw, 88px);
+    scroll-margin-top: 72px;
+  }
+
+  .cat-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 14px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .cat-head h2 {
+    font-size: 1.25rem;
+    letter-spacing: -0.02em;
+  }
+
+  .cat-head .link {
+    margin-left: auto;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    gap: 20px;
+  }
+
+  .end {
+    height: clamp(72px, 10vw, 128px);
+  }
+</style>

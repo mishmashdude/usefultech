@@ -1,0 +1,73 @@
+---
+// A glass segmented control for switching categories. Each segment is a real link.
+import { apps, appsIn } from '../data/apps';
+import { categories } from '../data/categories';
+import { to } from '../base';
+
+interface Props {
+  current?: string;
+}
+
+const { current = 'all' } = Astro.props;
+const tabs = [
+  { href: to('/categories'), label: 'All', count: apps.length, key: 'all' },
+  ...categories.map((c) => ({ href: to(`/categories/${c.slug}`), label: c.name, count: appsIn(c.slug).length, key: c.slug })),
+];
+---
+
+<nav class="tabs glass" aria-label="Categories">
+  {
+    tabs.map((t) => (
+      <a class="tab" href={t.href} aria-current={t.key === current ? 'page' : undefined}>
+        {t.label}
+        <span class="n">{t.count}</span>
+      </a>
+    ))
+  }
+</nav>
+
+<style>
+  .tabs {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    padding: 5px;
+    border-radius: 999px;
+  }
+
+  .tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 38px;
+    padding: 0 15px;
+    border-radius: 999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--ink-2);
+    transition:
+      color 0.15s,
+      background-color 0.2s;
+  }
+
+  .tab:hover {
+    color: var(--ink);
+  }
+
+  .tab[aria-current='page'] {
+    background: var(--ink);
+    color: var(--bg);
+  }
+
+  .n {
+    font-size: 0.75rem;
+    opacity: 0.55;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (max-width: 600px) {
+    .tabs {
+      border-radius: 24px;
+    }
+  }
+</style>

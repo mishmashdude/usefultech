@@ -1,0 +1,117 @@
+/* ==========================================================================
+   Shared bits for the mock app screens shown inside the windows.
+   Sizes are in em so phone screens can scale with the device.
+   ========================================================================== */
+
+.m-btn {
+  --bg: var(--tone);
+  --edge: var(--tone-deep);
+  --fg: var(--tone-on);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  height: 2.4em;
+  padding: 0 1em;
+  border-radius: 0.75em;
+  font-weight: 700;
+  color: var(--fg);
+  background: var(--bg);
+  box-shadow: 0 0.22em 0 var(--edge);
+  white-space: nowrap;
+  transition:
+    transform 0.15s var(--ease-spring),
+    box-shadow 0.15s var(--ease-spring),
+    opacity 0.2s;
+}
+
+.m-btn:hover {
+  transform: translateY(-0.06em);
+  box-shadow: 0 0.3em 0 var(--edge);
+}
+
+.m-btn:active {
+  transform: translateY(0.22em);
+  box-shadow: 0 0 0 var(--edge);
+  transition-duration: 0.05s;
+}
+
+.m-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+  transform: none;
+}
+
+.m-btn .icon {
+  width: 1.15em;
+  height: 1.15em;
+}
+
+.m-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  height: 2em;
+  padding: 0 0.85em;
+  border-radius: 999px;
+  background: var(--win-field);
+  color: var(--win-ink-2);
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    transform 0.15s var(--ease-spring),
+    background-color 0.2s;
+}
+
+.m-pill .icon {
+  width: 1.1em;
+  height: 1.1em;
+}
+
+.m-pill[aria-pressed='true'],
+.m-pill.is-on {
+  background: var(--tone);
+  color: var(--tone-on);
+  box-shadow: 0 0.18em 0 var(--tone-deep);
+}
+
+button.m-pill:active {
+  transform: translateY(0.15em);
+  box-shadow: none;
+}
+
+.m-muted {
+  color: var(--win-ink-2);
+}
+
+/* a tiny toast that pops up inside a mock */
+.m-toast {
+  position: absolute;
+  left: 50%;
+  bottom: 1.2em;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  padding: 0.6em 1em;
+  border-radius: 999px;
+  background: var(--win-ink);
+  color: var(--win-bg);
+  font-weight: 650;
+  white-space: nowrap;
+  translate: -50% 0;
+  box-shadow: var(--shadow-float);
+  animation: m-toast-in 0.35s var(--ease-spring) both;
+}
+
+.m-toast .icon {
+  width: 1.1em;
+  height: 1.1em;
+}
+
+@keyframes m-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.8em) scale(0.92);
+  }
+}

@@ -1,0 +1,127 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Base from '../../../designs/v1/layouts/Base.astro';
+import Icon from '../../../components/Icon.astro';
+import CategoryNav from '../../../designs/v1/components/CategoryNav.astro';
+import CategoryTile from '../../../designs/v1/components/CategoryTile.astro';
+import AppCard from '../../../designs/v1/components/AppCard.astro';
+import { appsIn } from '../../../designs/v1/data/apps';
+import { categories, type Category } from '../../../designs/v1/data/categories';
+
+export const getStaticPaths = (() =>
+  categories.map((category) => ({ params: { slug: category.slug }, props: { category } }))) satisfies GetStaticPaths;
+
+interface Props {
+  category: Category;
+}
+
+const { category } = Astro.props;
+const list = appsIn(category.slug);
+const others = categories.filter((c) => c.slug !== category.slug);
+---
+
+<Base title={`${category.name} apps`} description={category.description} current="categories">
+  <section class="page-head" data-tone={category.tone}>
+    <div class="container">
+      <div class="rise">
+        <CategoryNav current={category.slug} />
+      </div>
+      <div class="head-row rise" style="--d: 80ms">
+        <span class="big-icon"><Icon name={category.icon} /></span>
+        <div>
+          <h1 class="display-1">{category.name}</h1>
+          <p class="blurb">{category.blurb}</p>
+        </div>
+      </div>
+      <p class="lede rise" style="--d: 140ms">{category.description}</p>
+    </div>
+  </section>
+
+  <section class="container" aria-label={`${category.name} apps`}>
+    <ul class="card-grid" role="list">
+      {
+        list.map((app, i) => (
+          <li class="rise" style={`--d:${200 + i * 80}ms`}>
+            <AppCard app={app} morph headingLevel="h2" />
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="container others" aria-labelledby="others-title">
+    <h2 id="others-title" class="display-3" data-reveal>more corners of life</h2>
+    <ul class="tile-grid" role="list">
+      {
+        others.map((c, i) => (
+          <li data-reveal style={`--d:${i * 60}ms`}>
+            <CategoryTile category={c} />
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .page-head {
+    padding: clamp(32px, 5vw, 64px) 0 clamp(36px, 5vw, 56px);
+  }
+
+  .page-head .container {
+    display: grid;
+    gap: 30px;
+  }
+
+  .head-row {
+    display: flex;
+    align-items: center;
+    gap: clamp(16px, 3vw, 28px);
+  }
+
+  .big-icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: clamp(76px, 10vw, 112px);
+    height: clamp(76px, 10vw, 112px);
+    border-radius: 30%;
+    background: var(--tone);
+    color: var(--tone-on);
+    box-shadow: 0 7px 0 var(--tone-deep);
+    rotate: -4deg;
+  }
+
+  .big-icon :global(.icon) {
+    width: 52%;
+    height: 52%;
+  }
+
+  .blurb {
+    margin-top: 8px;
+    font-family: var(--font-display);
+    font-weight: 850;
+    font-size: clamp(1.1rem, 1rem + 0.5vw, 1.35rem);
+    color: var(--tone-text);
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+    gap: 22px;
+  }
+
+  .others {
+    padding: clamp(80px, 10vw, 140px) 0;
+  }
+
+  .others h2 {
+    margin-bottom: 26px;
+  }
+
+  .tile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+    gap: 18px;
+  }
+</style>

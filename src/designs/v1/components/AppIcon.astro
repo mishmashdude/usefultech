@@ -1,0 +1,68 @@
+---
+// A flat, slightly "pressable" app icon: tone-colored squircle + glyph.
+// If the app has a real icon image (app.iconImage) that is used instead.
+import Icon from '../../../components/Icon.astro';
+import ShellGlyph from './ShellGlyph.astro';
+import type { App } from '../data/apps';
+
+interface Props {
+  app: Pick<App, 'icon' | 'tone' | 'slug' | 'glyph' | 'iconImage'>;
+  size?: number;
+  class?: string;
+  /** opt into a cross-page morph (use on one icon per app per page) */
+  morph?: boolean;
+}
+
+const { app, size = 56, class: className, morph = false } = Astro.props;
+const style = [
+  `--s:${size}px`,
+  app.glyph ? `--glyph-fill:${app.glyph.fill};--glyph-detail:${app.glyph.detail}` : '',
+  morph ? `view-transition-name:app-icon-${app.slug}` : '',
+]
+  .filter(Boolean)
+  .join(';');
+---
+
+{
+  app.iconImage ? (
+    <img
+      class:list={['app-icon', 'app-icon--img', className]}
+      src={app.iconImage}
+      alt=""
+      width={size}
+      height={size}
+      style={style}
+    />
+  ) : (
+    <span class:list={['app-icon', className]} data-tone={app.tone} style={style} aria-hidden="true">
+      {app.icon === 'shell' ? <ShellGlyph /> : <Icon name={app.icon} />}
+    </span>
+  )
+}
+
+<style>
+  .app-icon {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: var(--s);
+    height: var(--s);
+    border-radius: calc(var(--s) * 0.27);
+    background: var(--tone);
+    color: var(--glyph-fill, var(--tone-on));
+    box-shadow:
+      inset 0 calc(var(--s) * -0.055) 0 0 color-mix(in oklab, var(--tone-deep) 55%, transparent),
+      0 1px 2px rgb(31 28 23 / 0.12);
+  }
+
+  .app-icon--img {
+    object-fit: cover;
+    background: none;
+  }
+
+  .app-icon :global(svg) {
+    width: 58%;
+    height: 58%;
+    margin-top: calc(var(--s) * -0.03);
+  }
+</style>

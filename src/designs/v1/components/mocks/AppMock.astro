@@ -1,0 +1,43 @@
+---
+// Picks the mock screen for an app. A real screenshot (app.screenshot) always wins.
+import type { App } from '../../data/apps';
+import MapleMock from './MapleMock.astro';
+import RallyMock from './RallyMock.astro';
+import ConsciousMock from './ConsciousMock.astro';
+import LingoMock from './LingoMock.astro';
+import FinderyMock from './FinderyMock.astro';
+import GenericMock from './GenericMock.astro';
+
+interface Props {
+  app: App;
+}
+
+const { app } = Astro.props;
+const mocks: Record<string, typeof MapleMock> = {
+  maple: MapleMock,
+  letsrally: RallyMock,
+  conscious: ConsciousMock,
+  lingo: LingoMock,
+  findery: FinderyMock,
+};
+const Mock = mocks[app.slug];
+---
+
+{
+  app.screenshot ? (
+    <img class="shot" src={app.screenshot} alt={`${app.name} screenshot`} loading="lazy" decoding="async" />
+  ) : Mock ? (
+    <Mock />
+  ) : (
+    <GenericMock app={app} />
+  )
+}
+
+<style>
+  .shot {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+  }
+</style>

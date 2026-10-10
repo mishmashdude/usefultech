@@ -1,0 +1,172 @@
+---
+import { to } from '../base';
+// An app tile: name, one line, and a peek at the app in its device frame.
+// The whole card links to the app's page.
+import Icon from '../../../components/Icon.astro';
+import AppIcon from './AppIcon.astro';
+import MacWindow from './MacWindow.astro';
+import AppMock from './mocks/AppMock.astro';
+import { categoriesOf, type App } from '../data/apps';
+
+interface Props {
+  app: App;
+  morph?: boolean;
+  headingLevel?: 'h2' | 'h3';
+}
+
+const { app, morph = false, headingLevel = 'h3' } = Astro.props;
+const Heading = headingLevel;
+const home = categoriesOf(app)[0];
+---
+
+<article class:list={['card', `card--${app.frame}`]}>
+  <div class="card-head">
+    <AppIcon app={app} size={40} morph={morph} />
+    <div class="card-title">
+      <Heading class="name"><a href={to(`/apps/${app.slug}`)} class="stretch">{app.name}</a></Heading>
+      <p class="meta">{[home?.name, app.platforms.join(', ')].filter(Boolean).join(' · ')}</p>
+    </div>
+    {app.status === 'soon' && <span class="tag">Coming soon</span>}
+    <span class="go" aria-hidden="true"><Icon name="ph:arrow-up-right" /></span>
+  </div>
+  <p class="tagline">{app.tagline}</p>
+  <div class="preview" inert aria-hidden="true">
+    <MacWindow frame={app.frame} title={app.window.title} url={app.window.url} appName={app.name} accent={app.accent}>
+      <AppMock app={app} />
+    </MacWindow>
+  </div>
+</article>
+
+<style>
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow:
+      0 0 0 1px var(--line),
+      0 3px 0 0 var(--line);
+    overflow: hidden;
+    transition:
+      transform 0.2s var(--ease),
+      box-shadow 0.2s var(--ease);
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 0 0 1px var(--line-2),
+      0 5px 0 0 var(--line-2);
+  }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 20px 0;
+  }
+
+  .card-title {
+    min-width: 0;
+  }
+
+  .name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .card-title .meta {
+    font-size: 0.8125rem;
+  }
+
+  .tag {
+    margin-left: auto;
+  }
+
+  .go {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    margin-left: auto;
+    border-radius: 50%;
+    color: var(--ink-3);
+    transition:
+      color 0.2s,
+      transform 0.2s var(--ease);
+  }
+
+  .tag + .go {
+    margin-left: 0;
+  }
+
+  .go :global(.icon) {
+    width: 16px;
+    height: 16px;
+  }
+
+  .card:hover .go {
+    color: var(--ink);
+    transform: translate(1px, -1px);
+  }
+
+  .tagline {
+    padding: 12px 20px 20px;
+    color: var(--ink-2);
+    font-size: 0.9375rem;
+  }
+
+  .stretch::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: var(--radius-lg);
+  }
+
+  .stretch:focus-visible {
+    outline: none;
+  }
+
+  .stretch:focus-visible::after {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+  }
+
+  /* the device peeks up from the bottom of the card */
+  .preview {
+    position: relative;
+    flex: none;
+    display: flex;
+    justify-content: center;
+    height: 320px;
+    margin: auto 16px 0;
+    padding-top: 22px;
+    border-radius: 14px 14px 0 0;
+    background: var(--bg-2);
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .card--phone .preview :global(.win) {
+    width: min(230px, 72%);
+  }
+
+  .card--browser .preview,
+  .card--mac .preview {
+    padding: 22px 0 0 22px;
+    justify-content: flex-start;
+  }
+
+  .card--browser .preview :global(.win),
+  .card--mac .preview :global(.win) {
+    width: 640px;
+    max-width: none;
+    height: 380px;
+    flex: none;
+  }
+</style>

@@ -1,0 +1,154 @@
+---
+// A slow-scrolling band of everyday things the apps help with. It can be paused.
+import Icon from '../../../components/Icon.astro';
+import ShellGlyph from './ShellGlyph.astro';
+
+const items = [
+  { text: 'plan the group trip', icon: 'ph:airplane-tilt-fill', tone: 'sky' },
+  { text: 'find a court for tonight', icon: 'ph:tennis-ball-fill', tone: 'lime' },
+  { text: 'pause before you scroll', icon: 'shell', tone: 'lilac' },
+  { text: 'order a coffee in japanese', icon: 'ph:chat-circle-dots-fill', tone: 'butter' },
+  { text: 'discover a new aussie label', icon: 'ph:coat-hanger-fill', tone: 'pink' },
+  { text: 'see what’s walkable', icon: 'ph:map-pin-area-fill', tone: 'mint' },
+];
+---
+
+<section class="marquee" aria-label="things usefultech helps with" data-marquee>
+  <div class="viewport">
+   <div class="track">
+    {
+      [0, 1].map((copy) => (
+        <ul class="row" role="list" aria-hidden={copy === 1 ? 'true' : undefined}>
+          {items.map((item) => (
+            <li data-tone={item.tone}>
+              <span class="m-icon">{item.icon === 'shell' ? <ShellGlyph /> : <Icon name={item.icon} />}</span>
+              {item.text}
+            </li>
+          ))}
+        </ul>
+      ))
+    }
+   </div>
+  </div>
+  <button type="button" class="pause" data-marquee-toggle aria-pressed="false" aria-label="pause the scrolling band">
+    <Icon name="ph:pause-fill" class="when-playing" />
+    <Icon name="ph:play-fill" class="when-paused" />
+  </button>
+</section>
+
+<style>
+  .marquee {
+    position: relative;
+    overflow: hidden;
+    padding: 30px 0;
+    margin-top: clamp(40px, 6vw, 72px);
+    border-block: 1px solid var(--line);
+  }
+
+  .viewport {
+    overflow: hidden;
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+
+  .track {
+    display: flex;
+    width: max-content;
+    animation: slide 46s linear infinite;
+  }
+
+  .marquee:hover .track,
+  .marquee:focus-within .track,
+  .marquee.is-paused .track {
+    animation-play-state: paused;
+  }
+
+  @keyframes slide {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  .row {
+    display: flex;
+    gap: 14px;
+    padding-right: 14px;
+  }
+
+  .row li {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    height: 60px;
+    padding: 0 24px 0 10px;
+    border-radius: 999px;
+    background: var(--tone-soft);
+    color: var(--tone-ink);
+    font-family: var(--font-display);
+    font-weight: 850;
+    font-size: 1.3rem;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+
+  .m-icon {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--tone);
+    color: var(--tone-on);
+  }
+
+  .m-icon :global(.icon) {
+    width: 22px;
+    height: 22px;
+  }
+
+  .m-icon :global(.shell-glyph) {
+    --glyph-fill: #ffd8bd;
+    --glyph-detail: #d9845a;
+  }
+
+  .pause {
+    position: absolute;
+    right: 12px;
+    bottom: 8px;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--surface);
+    color: var(--ink-2);
+    box-shadow: 0 0 0 1px var(--line);
+  }
+
+  .pause :global(.icon) {
+    width: 12px;
+    height: 12px;
+  }
+
+  .pause[aria-pressed='true'] :global(.when-playing),
+  .pause[aria-pressed='false'] :global(.when-paused) {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pause {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((band) => {
+    const btn = band.querySelector<HTMLButtonElement>('[data-marquee-toggle]');
+    btn?.addEventListener('click', () => {
+      const paused = btn.getAttribute('aria-pressed') !== 'true';
+      btn.setAttribute('aria-pressed', String(paused));
+      btn.setAttribute('aria-label', paused ? 'play the scrolling band' : 'pause the scrolling band');
+      band.classList.toggle('is-paused', paused);
+    });
+  });
+</script>

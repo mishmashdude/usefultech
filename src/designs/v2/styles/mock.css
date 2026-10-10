@@ -1,0 +1,102 @@
+/* ==========================================================================
+   Shared bits for the mock app screens shown inside the windows.
+   Neutral by default; the app's --accent is used sparingly.
+   Sizes are in em so phone screens scale with the device.
+   ========================================================================== */
+
+.m-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  height: 2.4em;
+  padding: 0 1em;
+  border-radius: 0.75em;
+  font-weight: 600;
+  color: var(--on-accent, #fff);
+  background: var(--accent, var(--win-ink));
+  box-shadow: 0 0.18em 0 color-mix(in oklab, var(--accent, var(--win-ink)) 70%, #000);
+  white-space: nowrap;
+  transition:
+    transform 0.15s var(--ease),
+    box-shadow 0.15s var(--ease),
+    opacity 0.2s;
+}
+
+.m-btn:active {
+  transform: translateY(0.18em);
+  box-shadow: 0 0 0 transparent;
+  transition-duration: 0.05s;
+}
+
+.m-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+  transform: none;
+}
+
+.m-btn .icon {
+  width: 1.1em;
+  height: 1.1em;
+}
+
+.m-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  height: 2em;
+  padding: 0 0.85em;
+  border-radius: 999px;
+  background: var(--win-field);
+  color: var(--win-ink-2);
+  font-weight: 550;
+  white-space: nowrap;
+  transition: background-color 0.15s;
+}
+
+.m-pill .icon {
+  width: 1.05em;
+  height: 1.05em;
+}
+
+.m-pill[aria-pressed='true'],
+.m-pill.is-on {
+  background: var(--win-ink);
+  color: var(--win-bg);
+}
+
+.m-muted {
+  color: var(--win-ink-2);
+}
+
+/* a tiny toast that pops up inside a mock */
+.m-toast {
+  position: absolute;
+  left: 50%;
+  bottom: 1.2em;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  padding: 0.6em 1em;
+  border-radius: 999px;
+  background: var(--win-ink);
+  color: var(--win-bg);
+  font-weight: 550;
+  white-space: nowrap;
+  translate: -50% 0;
+  box-shadow: var(--shadow-float);
+  animation: m-toast-in 0.3s var(--ease) both;
+}
+
+.m-toast .icon {
+  width: 1.1em;
+  height: 1.1em;
+}
+
+@keyframes m-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.6em);
+  }
+}

@@ -1,0 +1,262 @@
+---
+// A big rounded card: the app's real screens on a quiet stage, with a glass caption.
+// The whole card links to the app's page.
+import Icon from '../../../components/Icon.astro';
+import AppIcon from './AppIcon.astro';
+import Screen from './Screen.astro';
+import { categoriesOf, type App } from '../data/apps';
+import { to } from '../base';
+
+interface Props {
+  app: App;
+  /** wide = spans two thirds, tall = one third, full = a whole row (short), compact = for small grids */
+  size?: 'wide' | 'tall' | 'full' | 'compact';
+  morph?: boolean;
+  headingLevel?: 'h2' | 'h3';
+}
+
+const { app, size = 'tall', morph = false, headingLevel = 'h3' } = Astro.props;
+const Heading = headingLevel;
+const home = categoriesOf(app)[0];
+const [first, second] = app.screens;
+const meta = [home?.name, app.platforms.join(', '), app.status === 'soon' ? 'Coming soon' : null]
+  .filter(Boolean)
+  .join(' · ');
+---
+
+<article class:list={['card', `card--${size}`, `card--${app.frame}`, { 'card--empty': !first }]}>
+  <div class="media" aria-hidden="true">
+    {
+      !first ? (
+        <div class="empty">
+          <AppIcon app={app} size={64} />
+          <p>Screens coming soon</p>
+        </div>
+      ) : app.frame === 'browser' ? (
+        <Screen shot={first} url={app.url} class="shot shot--browser" sizes="(min-width: 1000px) 900px, 120vw" />
+      ) : (
+        <>
+          {second && size !== 'compact' && (
+            <Screen shot={second} class="shot shot--back" sizes="(min-width: 1000px) 240px, 40vw" />
+          )}
+          <Screen shot={first} class="shot shot--front" sizes="(min-width: 1000px) 280px, 52vw" />
+        </>
+      )
+    }
+  </div>
+
+  <p class="meta glass">{meta}</p>
+
+  <div class="caption glass">
+    <AppIcon app={app} size={40} morph={morph} />
+    <div class="cap-text">
+      <Heading class="name"><a class="stretch" href={to(`/apps/${app.slug}`)}>{app.name}</a></Heading>
+      <p class="tagline">{app.tagline}</p>
+    </div>
+    <span class="go" aria-hidden="true"><Icon name="ph:arrow-up-right" /></span>
+  </div>
+</article>
+
+<style>
+  .card {
+    --card-h: 560px;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    height: var(--card-h);
+    border-radius: var(--r-card);
+    background: var(--stage);
+  }
+
+  .card--full {
+    --card-h: 340px;
+  }
+
+  .card--compact {
+    --card-h: 460px;
+  }
+
+  .media {
+    position: absolute;
+    inset: 0;
+    transition: transform 0.9s var(--ease);
+  }
+
+  .card:hover .media {
+    transform: scale(1.025);
+  }
+
+  /* phones: one in front, one peeking from behind; both run off the bottom */
+  .media :global(.shot--front) {
+    position: absolute;
+    left: 50%;
+    top: 64px;
+    z-index: 2;
+    width: min(50%, 290px);
+    translate: -36% 0;
+  }
+
+  .media :global(.shot--back) {
+    position: absolute;
+    left: 50%;
+    top: 112px;
+    z-index: 1;
+    width: min(42%, 240px);
+    translate: -96% 0;
+  }
+
+  .card--compact .media :global(.shot--front) {
+    translate: -50% 0;
+    width: min(56%, 270px);
+  }
+
+  /* websites: a big window that bleeds off the right and bottom */
+  .media :global(.shot--browser) {
+    position: absolute;
+    left: 7%;
+    top: 72px;
+    width: max(780px, 108%);
+  }
+
+  .card--compact .media :global(.shot--browser) {
+    left: 9%;
+    width: max(620px, 160%);
+  }
+
+  .empty {
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 14px;
+    height: 100%;
+    padding-bottom: 72px;
+    color: var(--ink-3);
+    font-size: 0.875rem;
+  }
+
+  .meta {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    z-index: 3;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+
+  .caption {
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    bottom: 14px;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 460px;
+    padding: 12px;
+    border-radius: 24px;
+    /* denser glass: the caption sits on top of colourful screenshots */
+    background: var(--glass-strong);
+  }
+
+  .cap-text {
+    min-width: 0;
+  }
+
+  .name {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .tagline {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: var(--ink-2);
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  .go {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 36px;
+    height: 36px;
+    margin-left: auto;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--bg);
+    transition: transform 0.35s var(--ease);
+  }
+
+  .go :global(.icon) {
+    width: 16px;
+    height: 16px;
+  }
+
+  .card:hover .go {
+    transform: translate(2px, -2px);
+  }
+
+  .stretch::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    border-radius: var(--r-card);
+  }
+
+  .stretch:focus-visible {
+    outline: none;
+  }
+
+  .stretch:focus-visible::after {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+  }
+
+  @media (max-width: 960px) {
+    .card {
+      --card-h: 500px;
+    }
+
+    .card--full {
+      --card-h: 320px;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .card {
+      --card-h: 460px;
+    }
+
+    .card--full {
+      --card-h: 320px;
+    }
+
+    .media :global(.shot--front) {
+      width: 58%;
+      translate: -40% 0;
+    }
+
+    .media :global(.shot--back) {
+      width: 48%;
+      translate: -100% 0;
+    }
+
+    .media :global(.shot--browser) {
+      left: 8%;
+      width: 175%;
+    }
+  }
+</style>

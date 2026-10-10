@@ -1,0 +1,63 @@
+---
+// A quiet app icon: neutral tile + the app's glyph in its accent colour.
+// If the app has a real icon image (app.iconImage) that is used instead.
+import Icon from '../../../components/Icon.astro';
+import ShellGlyph from './ShellGlyph.astro';
+import { accentStyle, type App } from '../data/apps';
+
+interface Props {
+  app: Pick<App, 'icon' | 'accent' | 'slug' | 'iconImage'>;
+  size?: number;
+  class?: string;
+  /** opt into a cross-page morph (use on one icon per app per page) */
+  morph?: boolean;
+}
+
+const { app, size = 48, class: className, morph = false } = Astro.props;
+const style = [`--s:${size}px`, accentStyle(app), morph ? `view-transition-name:app-icon-${app.slug}` : '']
+  .filter(Boolean)
+  .join(';');
+---
+
+{
+  app.iconImage ? (
+    <img
+      class:list={['app-icon', 'app-icon--img', className]}
+      src={app.iconImage}
+      alt=""
+      width={size}
+      height={size}
+      style={style}
+    />
+  ) : (
+    <span class:list={['app-icon', className]} data-accent style={style} aria-hidden="true">
+      {app.icon === 'shell' ? <ShellGlyph /> : <Icon name={app.icon} />}
+    </span>
+  )
+}
+
+<style>
+  .app-icon {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: var(--s);
+    height: var(--s);
+    border-radius: calc(var(--s) * 0.26);
+    background: var(--tile);
+    color: var(--accent);
+    box-shadow:
+      inset 0 0 0 1px var(--tile-edge),
+      0 1px 2px rgb(20 20 19 / 0.06);
+  }
+
+  .app-icon--img {
+    object-fit: cover;
+    background: none;
+  }
+
+  .app-icon :global(svg) {
+    width: 54%;
+    height: 54%;
+  }
+</style>

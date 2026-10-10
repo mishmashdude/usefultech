@@ -1,0 +1,218 @@
+---
+import { to } from '../../base';
+// The "Explore" window on the hero desktop: a little Finder for browsing apps by category.
+// Filtering + opening apps is handled by the desktop script (MacDesktop.astro).
+import Icon from '../../../../components/Icon.astro';
+import AppIcon from '../AppIcon.astro';
+import { apps } from '../../data/apps';
+import { categories } from '../../data/categories';
+---
+
+<div class="explore" data-explore>
+  <nav class="side" aria-label="Explore by category">
+    <p class="side-label">usefultech</p>
+    <button type="button" class="side-item" data-explore-filter="all" data-label="All apps" aria-pressed="true">
+      <Icon name="ph:squares-four" />All apps
+    </button>
+    <p class="side-label">Categories</p>
+    {
+      categories.map((c) => (
+        <button type="button" class="side-item" data-explore-filter={c.slug} data-label={c.name} aria-pressed="false">
+          <Icon name={c.icon} />
+          {c.name}
+        </button>
+      ))
+    }
+  </nav>
+  <div class="main">
+    <div class="toolbar">
+      <b data-explore-title>All apps</b>
+      <span class="count" data-explore-count>{apps.length} apps</span>
+    </div>
+    <ul class="grid" role="list">
+      {
+        apps.map((app) => (
+          <li data-cats={app.categories.join(' ')}>
+            <button type="button" class="item" data-open={app.slug}>
+              <AppIcon app={app} size={52} />
+              <span class="name">{app.name}</span>
+            </button>
+          </li>
+        ))
+      }
+    </ul>
+    <div class="pathbar">
+      <span class="path"><Icon name="ph:folder-simple" />usefultech › <span data-explore-title>All apps</span></span>
+      <a href={to('/categories')} data-explore-link>Open page <Icon name="ph:arrow-up-right" /></a>
+    </div>
+  </div>
+</div>
+
+<style>
+  .explore {
+    display: flex;
+    height: 100%;
+  }
+
+  .side {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    width: 148px;
+    padding: 10px 8px;
+    background: var(--win-side);
+    border-right: 1px solid var(--win-line);
+  }
+
+  .side-label {
+    padding: 8px 8px 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--win-ink-2);
+  }
+
+  .side-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 28px;
+    padding: 0 8px;
+    border-radius: 7px;
+    text-align: left;
+  }
+
+  .side-item:hover {
+    background: var(--win-hover);
+  }
+
+  .side-item[aria-pressed='true'] {
+    background: var(--win-hover);
+    font-weight: 600;
+  }
+
+  .side-item :global(.icon) {
+    width: 15px;
+    height: 15px;
+    color: var(--win-ink-2);
+  }
+
+  .main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 40px;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--win-line);
+  }
+
+  .toolbar b {
+    font-weight: 600;
+  }
+
+  .count {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--win-ink-2);
+  }
+
+  .grid {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    align-content: start;
+    gap: 4px;
+    padding: 14px;
+    overflow: auto;
+  }
+
+  .item {
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 10px 4px 8px;
+    border-radius: 10px;
+    text-align: center;
+    transition: background-color 0.15s;
+  }
+
+  .item:hover {
+    background: var(--win-hover);
+  }
+
+  .name {
+    font-size: 12px;
+    font-weight: 550;
+  }
+
+  .pathbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    height: 32px;
+    padding: 0 14px;
+    border-top: 1px solid var(--win-line);
+    font-size: 11.5px;
+    color: var(--win-ink-2);
+    white-space: nowrap;
+  }
+
+  .path,
+  .pathbar a {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+  }
+
+  .pathbar :global(.icon) {
+    width: 12px;
+    height: 12px;
+  }
+
+  .pathbar a {
+    font-weight: 600;
+    color: var(--win-ink);
+    border-radius: 4px;
+  }
+
+  .pathbar a:hover {
+    text-decoration: underline;
+  }
+
+  @container (max-width: 480px) {
+    .explore {
+      flex-direction: column;
+    }
+
+    .side {
+      flex-direction: row;
+      width: auto;
+      padding: 8px;
+      overflow-x: auto;
+      border-right: 0;
+      border-bottom: 1px solid var(--win-line);
+      scrollbar-width: none;
+    }
+
+    .side-label,
+    .path,
+    .toolbar {
+      display: none;
+    }
+
+    .side-item {
+      flex: none;
+    }
+  }
+</style>

@@ -1,0 +1,24 @@
+{
+  "name": "usefultech",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "description": "usefultech — a little collective of apps that support your life.",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@fontsource-variable/geist": "5.3.0",
+    "@fontsource-variable/inter": "5.3.0",
+    "@fontsource-variable/nunito": "5.3.0",
+    "@iconify-json/ph": "1.2.2",
+    "@iconify/utils": "3.1.7",
+    "astro": "7.3.5"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

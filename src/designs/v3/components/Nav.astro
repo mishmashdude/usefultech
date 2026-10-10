@@ -1,0 +1,173 @@
+---
+// A floating liquid-glass pill.
+import Icon from '../../../components/Icon.astro';
+import { to } from '../base';
+
+interface Props {
+  current?: string;
+}
+
+const { current } = Astro.props;
+const links = [
+  { href: to('/#apps'), label: 'Apps', key: 'apps' },
+  { href: to('/categories'), label: 'Categories', key: 'categories' },
+  { href: to('/#about'), label: 'About', key: 'about' },
+];
+---
+
+<header class="nav-wrap">
+  <nav class="nav glass" aria-label="Primary">
+    <a class="brand" href={to('/')} aria-label="usefultech home">usefultech</a>
+    <div class="links">
+      {
+        links.map((l) => (
+          <a href={l.href} aria-current={l.key === current ? 'page' : undefined}>
+            {l.label}
+          </a>
+        ))
+      }
+    </div>
+    <button type="button" class="icon-btn" data-theme-toggle aria-label="Switch to dark mode">
+      <Icon name="ph:moon" class="when-light" />
+      <Icon name="ph:sun" class="when-dark" />
+    </button>
+    <details class="menu" data-menu>
+      <summary class="icon-btn" aria-label="Menu"><Icon name="ph:list" /></summary>
+      <div class="menu-panel glass">
+        {links.map((l) => <a href={l.href}>{l.label}</a>)}
+      </div>
+    </details>
+  </nav>
+</header>
+
+<style>
+  .nav-wrap {
+    position: fixed;
+    top: 14px;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    padding: 0 var(--gutter);
+    pointer-events: none;
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: min(100%, 620px);
+    height: 54px;
+    padding: 0 7px 0 22px;
+    border-radius: 999px;
+    pointer-events: auto;
+  }
+
+  .brand {
+    margin-right: auto;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    border-radius: 6px;
+  }
+
+  .links {
+    display: flex;
+    gap: 2px;
+  }
+
+  .links a {
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--ink-2);
+    transition:
+      color 0.15s,
+      background-color 0.15s;
+  }
+
+  .links a:hover,
+  .links a[aria-current='page'] {
+    color: var(--ink);
+    background: rgb(255 255 255 / 0.35);
+  }
+
+  :global(:root[data-theme='dark']) .links a:hover,
+  :global(:root[data-theme='dark']) .links a[aria-current='page'] {
+    background: rgb(255 255 255 / 0.08);
+  }
+
+  .icon-btn {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition:
+      color 0.15s,
+      background-color 0.15s;
+  }
+
+  .icon-btn:hover {
+    color: var(--ink);
+    background: rgb(255 255 255 / 0.35);
+  }
+
+  .icon-btn :global(.icon) {
+    width: 18px;
+    height: 18px;
+  }
+
+  :global(:root[data-theme='dark']) .icon-btn :global(.when-light),
+  :global(:root:not([data-theme='dark'])) .icon-btn :global(.when-dark) {
+    display: none;
+  }
+
+  .menu {
+    display: none;
+    position: relative;
+  }
+
+  .menu summary {
+    list-style: none;
+  }
+
+  .menu summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .menu-panel {
+    position: absolute;
+    right: -4px;
+    top: calc(100% + 12px);
+    display: grid;
+    min-width: 200px;
+    padding: 6px;
+    border-radius: 22px;
+    background: var(--glass-strong);
+  }
+
+  .menu-panel a {
+    padding: 11px 14px;
+    border-radius: 14px;
+    font-weight: 500;
+  }
+
+  .menu-panel a:hover {
+    background: rgb(255 255 255 / 0.35);
+  }
+
+  @media (max-width: 600px) {
+    .links {
+      display: none;
+    }
+
+    .menu {
+      display: block;
+    }
+  }
+</style>

@@ -1,0 +1,445 @@
+---
+// One app's big section on the home page: story on one side, its window on the other.
+import Icon from '../../../components/Icon.astro';
+import AppIcon from './AppIcon.astro';
+import MacWindow from './MacWindow.astro';
+import AppMock from './mocks/AppMock.astro';
+import { categoriesOf, type App } from '../data/apps';
+import { to } from '../base';
+
+interface Props {
+  app: App;
+  index: number;
+}
+
+const { app, index } = Astro.props;
+const cats = categoriesOf(app);
+const external = app.link.href.startsWith('http');
+---
+
+<article
+  class:list={['showcase', { 'showcase--flip': index % 2 === 1, 'showcase--phone': app.frame === 'phone' }]}
+  data-tone={app.tone}
+  id={app.slug}
+  aria-labelledby={`${app.slug}-name`}
+>
+  <div class="copy" data-reveal>
+    <div class="app-head">
+      <AppIcon app={app} size={64} morph />
+      <div>
+        <h3 id={`${app.slug}-name`} class="app-name">{app.name}</h3>
+        <p class="app-kind">{app.kind} · {app.platforms.join(' + ')}</p>
+      </div>
+      {app.status === 'soon' && <span class="soon">coming soon</span>}
+    </div>
+
+    <p class="tagline">{app.tagline}</p>
+    <p class="desc">{app.description}</p>
+
+    <ul class="features" role="list">
+      {
+        app.features.map((f) => (
+          <li>
+            <span class="f-icon">
+              <Icon name={f.icon} />
+            </span>
+            <p>
+              <b>{f.title}</b>
+              {f.body}
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="actions">
+      <a
+        class="btn btn--tone"
+        href={app.link.href}
+        target={external ? '_blank' : undefined}
+        rel={external ? 'noopener' : undefined}
+      >
+        {app.link.label}
+        <Icon name="ph:arrow-up-right-bold" class="icon--nudge-out" />
+        {external && <span class="sr-only">(opens in a new tab)</span>}
+      </a>
+      <a class="link-arrow" href={to(`/apps/${app.slug}`)}>
+        more about {app.name}
+        <Icon name="ph:arrow-right-bold" />
+      </a>
+    </div>
+
+    <div class="meta">
+      {
+        app.maker && (
+          <span class="maker">
+            <span class="avatar">{app.maker.name.charAt(0)}</span>
+            made by {app.maker.name}
+          </span>
+        )
+      }
+      <span class="cats">
+        {cats.map((c) => (
+          <a class="chip" data-tone={c.tone} href={to(`/categories/${c.slug}`)}>
+            <Icon name={c.icon} />
+            {c.name}
+          </a>
+        ))}
+      </span>
+    </div>
+  </div>
+
+  <div class="stage" data-reveal style="--d: 120ms">
+    <div class="stage-bg" aria-hidden="true"></div>
+    <div class="device">
+      <MacWindow frame={app.frame} title={app.window.title} url={app.window.url} appName={app.name}>
+        <AppMock app={app} />
+      </MacWindow>
+    </div>
+    <div class="toast" aria-hidden="true">
+      <span class="toast-icon"><Icon name={app.toast.icon} /></span>
+      <span class="toast-text">
+        <b>{app.toast.title}</b>
+        <small>{app.toast.text}</small>
+      </span>
+    </div>
+    <ul class="stickers" role="list" aria-hidden="true">
+      {app.highlights.map((h, i) => <li style={`--i:${i}`}>{h}</li>)}
+    </ul>
+  </div>
+</article>
+
+<style>
+  .showcase {
+    display: grid;
+    gap: clamp(36px, 5vw, 80px);
+    align-items: center;
+    scroll-margin-top: 96px;
+  }
+
+  @media (min-width: 980px) {
+    .showcase {
+      grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr);
+    }
+
+    .showcase--flip {
+      grid-template-columns: minmax(0, 1.14fr) minmax(0, 0.86fr);
+    }
+
+    .showcase--flip .copy {
+      order: 2;
+    }
+  }
+
+  /* ---- copy ---- */
+  .copy {
+    display: grid;
+    gap: 22px;
+  }
+
+  .app-head {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .app-name {
+    font-size: clamp(2rem, 1.6rem + 1.6vw, 2.8rem);
+    letter-spacing: -0.045em;
+    line-height: 1;
+  }
+
+  .app-kind {
+    margin-top: 4px;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 0.98rem;
+    color: var(--tone-text);
+  }
+
+  .soon {
+    align-self: flex-start;
+    margin-left: auto;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--font-display);
+    font-weight: 850;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    rotate: 3deg;
+  }
+
+  .tagline {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(1.55rem, 1.2rem + 1.2vw, 2.1rem);
+    line-height: 1.08;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+
+  .desc {
+    color: var(--ink-2);
+    max-width: 34em;
+  }
+
+  .features {
+    display: grid;
+    gap: 14px;
+  }
+
+  .features li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 14px;
+    align-items: start;
+  }
+
+  .f-icon {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--tone-soft);
+    color: var(--tone-text);
+  }
+
+  .f-icon :global(.icon) {
+    width: 21px;
+    height: 21px;
+  }
+
+  .features p {
+    color: var(--ink-2);
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .features b {
+    display: block;
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-weight: 850;
+    font-size: 1.06rem;
+    letter-spacing: -0.01em;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px 24px;
+    margin-top: 4px;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 18px;
+    padding-top: 18px;
+    border-top: 1px dashed var(--line-2);
+  }
+
+  .maker {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-family: var(--font-display);
+    font-weight: 800;
+    color: var(--ink-2);
+  }
+
+  .avatar {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--tone);
+    color: var(--tone-on);
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .cats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* ---- stage ---- */
+  .stage {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: clamp(440px, 46vw, 580px);
+    padding: clamp(28px, 4vw, 52px) clamp(18px, 3.5vw, 44px);
+  }
+
+  .stage-bg {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-xl);
+    background-color: var(--tone-soft);
+    background-image: radial-gradient(
+      color-mix(in oklab, var(--tone) 55%, transparent) 1.3px,
+      transparent 1.6px
+    );
+    background-size: 20px 20px;
+  }
+
+  .device {
+    position: relative;
+    width: 100%;
+  }
+
+  .device :global(.win:not(.win--phone)) {
+    height: clamp(360px, 36vw, 440px);
+  }
+
+  .showcase--phone .device {
+    width: min(290px, 74%);
+  }
+
+  .toast {
+    position: absolute;
+    top: 7%;
+    right: -14px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: min(280px, 70%);
+    padding: 12px 18px 12px 12px;
+    border-radius: 18px;
+    background: var(--surface);
+    box-shadow: var(--shadow-float);
+    rotate: 2.5deg;
+    animation: float 5s ease-in-out infinite;
+  }
+
+  .showcase--flip .toast {
+    right: auto;
+    left: -14px;
+    rotate: -2.5deg;
+  }
+
+  @keyframes float {
+    50% {
+      translate: 0 -8px;
+    }
+  }
+
+  .toast-icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: var(--tone);
+    color: var(--tone-on);
+  }
+
+  .toast-icon :global(.icon) {
+    width: 20px;
+    height: 20px;
+  }
+
+  .toast-text {
+    display: grid;
+    line-height: 1.25;
+    min-width: 0;
+  }
+
+  .toast-text b {
+    font-family: var(--font-display);
+    font-weight: 850;
+  }
+
+  .toast-text small {
+    color: var(--ink-2);
+    font-size: 0.86rem;
+  }
+
+  .stickers li {
+    position: absolute;
+    z-index: 2;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: var(--tone);
+    color: var(--tone-on);
+    font-family: var(--font-display);
+    font-weight: 850;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    box-shadow: 0 4px 0 var(--tone-deep);
+  }
+
+  .stickers li:nth-child(1) {
+    left: -10px;
+    bottom: 18%;
+    rotate: -5deg;
+  }
+
+  .stickers li:nth-child(2) {
+    right: 6%;
+    bottom: -14px;
+    rotate: 3deg;
+  }
+
+  .stickers li:nth-child(3) {
+    display: none;
+  }
+
+  .showcase--phone .stickers li:nth-child(3) {
+    display: block;
+    left: 4%;
+    top: 12%;
+    rotate: 4deg;
+  }
+
+  .showcase--flip .stickers li:nth-child(1) {
+    left: auto;
+    right: -10px;
+    rotate: 5deg;
+  }
+
+  .showcase--flip .stickers li:nth-child(2) {
+    right: auto;
+    left: 6%;
+  }
+
+  .showcase--flip.showcase--phone .stickers li:nth-child(3) {
+    left: auto;
+    right: 4%;
+  }
+
+  @media (max-width: 640px) {
+    .showcase--phone .stickers li:nth-child(3) {
+      display: none;
+    }
+
+    .toast {
+      right: 8px;
+      top: -18px;
+      max-width: calc(100% - 16px);
+    }
+
+    .showcase--flip .toast {
+      left: 8px;
+    }
+
+    .stickers li:nth-child(1) {
+      left: 8px;
+    }
+
+    .showcase--flip .stickers li:nth-child(1) {
+      right: 8px;
+    }
+  }
+</style>

@@ -1,0 +1,147 @@
+---
+import Base from '../../../designs/v1/layouts/Base.astro';
+import Icon from '../../../components/Icon.astro';
+import CategoryNav from '../../../designs/v1/components/CategoryNav.astro';
+import CategoryTile from '../../../designs/v1/components/CategoryTile.astro';
+import AppCard from '../../../designs/v1/components/AppCard.astro';
+import { appsIn } from '../../../designs/v1/data/apps';
+import { categories } from '../../../designs/v1/data/categories';
+import { to } from '../../../designs/v1/base';
+---
+
+<Base
+  title="explore by category"
+  description="browse usefultech apps by what you need: travel, sport, wellbeing, language and style."
+  current="categories"
+>
+  <section class="page-head">
+    <div class="container">
+      <p class="kicker rise"><Icon name="ph:squares-four-fill" />explore</p>
+      <h1 class="display-1 rise" style="--d: 60ms">find an app<br /><span class="accent">for that.</span></h1>
+      <p class="lede rise" style="--d: 120ms">
+        browse usefultech by what you’re trying to do. some apps live in more than one place. life’s like that.
+      </p>
+      <div class="rise" style="--d: 180ms">
+        <CategoryNav current="all" />
+      </div>
+    </div>
+  </section>
+
+  <section class="container tiles" aria-label="all categories">
+    <ul class="tile-grid" role="list">
+      {
+        categories.map((c, i) => (
+          <li data-reveal style={`--d:${i * 60}ms`}>
+            <CategoryTile category={c} />
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  {
+    categories.map((c) => (
+      <section class="container cat-section" id={c.slug} aria-labelledby={`${c.slug}-title`} data-tone={c.tone}>
+        <div class="cat-head" data-reveal>
+          <span class="cat-icon">
+            <Icon name={c.icon} />
+          </span>
+          <div>
+            <h2 id={`${c.slug}-title`} class="display-3">{c.name}</h2>
+            <p>{c.description}</p>
+          </div>
+          <a class="link-arrow" href={to(`/categories/${c.slug}`)}>
+            open {c.name} <Icon name="ph:arrow-right-bold" />
+          </a>
+        </div>
+        <ul class="card-grid" role="list">
+          {appsIn(c.slug).map((app) => (
+            <li data-reveal>
+              <AppCard app={app} />
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+  <div class="spacer"></div>
+</Base>
+
+<style>
+  .page-head {
+    padding: clamp(36px, 6vw, 80px) 0 clamp(36px, 5vw, 56px);
+  }
+
+  .page-head .container {
+    display: grid;
+    gap: 22px;
+    justify-items: start;
+  }
+
+  .tile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+    gap: 18px;
+  }
+
+  .cat-section {
+    padding-top: clamp(72px, 9vw, 120px);
+    scroll-margin-top: 80px;
+  }
+
+  .cat-head {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 20px;
+    align-items: center;
+    margin-bottom: 28px;
+    padding-bottom: 24px;
+    border-bottom: 2px dashed color-mix(in oklab, var(--tone) 60%, transparent);
+  }
+
+  .cat-head > div p {
+    color: var(--ink-2);
+    margin-top: 4px;
+  }
+
+  .cat-head .link-arrow {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  @media (min-width: 760px) {
+    .cat-head {
+      grid-template-columns: auto 1fr auto;
+    }
+
+    .cat-head .link-arrow {
+      grid-column: 3;
+    }
+  }
+
+  .cat-icon {
+    display: grid;
+    place-items: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 18px;
+    background: var(--tone);
+    color: var(--tone-on);
+    box-shadow: 0 4px 0 var(--tone-deep);
+  }
+
+  .cat-icon :global(.icon) {
+    width: 30px;
+    height: 30px;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+    gap: 22px;
+  }
+
+  .spacer {
+    height: clamp(80px, 10vw, 140px);
+  }
+</style>

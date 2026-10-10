@@ -1,0 +1,125 @@
+---
+import { to } from '../base';
+// Categories as simple rows: name, one line, the apps inside.
+import Icon from '../../../components/Icon.astro';
+import AppIcon from './AppIcon.astro';
+import { appsIn } from '../data/apps';
+import { categories } from '../data/categories';
+
+interface Props {
+  /** leave one category out (e.g. the one you're on) */
+  exclude?: string;
+}
+const { exclude } = Astro.props;
+const shown = categories.filter((c) => c.slug !== exclude);
+---
+
+<ul class="cat-list" role="list">
+  {
+    shown.map((c) => {
+      const list = appsIn(c.slug);
+      return (
+        <li>
+          <a class="row" href={to(`/categories/${c.slug}`)}>
+            <span class="name">
+              <Icon name={c.icon} />
+              {c.name}
+            </span>
+            <span class="desc">{c.description}</span>
+            <span class="apps">
+              {list.map((a) => (
+                <AppIcon app={a} size={26} />
+              ))}
+              <span class="count">{list.length}</span>
+            </span>
+            <Icon name="ph:arrow-right" class="arrow" />
+          </a>
+        </li>
+      );
+    })
+  }
+</ul>
+
+<style>
+  .cat-list {
+    border-top: 1px solid var(--line);
+  }
+
+  .cat-list li {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: minmax(150px, 1fr) 2fr 92px 20px;
+    align-items: center;
+    gap: 16px 24px;
+    padding: 18px 12px;
+    border-radius: 12px;
+    transition: background-color 0.15s;
+  }
+
+  .row:hover {
+    background: var(--bg-2);
+  }
+
+  .name {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+
+  .name :global(.icon) {
+    width: 18px;
+    height: 18px;
+    color: var(--ink-3);
+  }
+
+  .desc {
+    color: var(--ink-2);
+    font-size: 0.9375rem;
+  }
+
+  .apps {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+
+  .count {
+    min-width: 1.5em;
+    margin-left: 4px;
+    font-size: 0.875rem;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .row :global(.arrow) {
+    width: 18px;
+    height: 18px;
+    color: var(--ink-3);
+    transition:
+      transform 0.2s var(--ease),
+      color 0.2s;
+  }
+
+  .row:hover :global(.arrow) {
+    color: var(--ink);
+    transform: translateX(3px);
+  }
+
+  @media (max-width: 720px) {
+    .row {
+      grid-template-columns: 1fr 92px 20px;
+      padding: 16px 8px;
+    }
+
+    .desc {
+      display: none;
+    }
+  }
+</style>

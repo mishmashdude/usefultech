@@ -1,0 +1,388 @@
+---
+// A little macOS window. Three frames:
+//   mac      – title bar + content
+//   browser  – title bar with an address bar
+//   phone    – an iPhone (on the desktop it gets a floating title pill, like iPhone Mirroring)
+// With `interactive`, the traffic lights become real buttons and the desktop script can drag it.
+import Icon from '../../../components/Icon.astro';
+
+interface Props {
+  title: string;
+  frame?: 'mac' | 'browser' | 'phone';
+  url?: string;
+  interactive?: boolean;
+  windowId?: string;
+  appName?: string;
+  tone?: string;
+  hidden?: boolean;
+  class?: string;
+  style?: string;
+}
+
+const {
+  title,
+  frame = 'mac',
+  url,
+  interactive = false,
+  windowId,
+  appName,
+  tone,
+  hidden,
+  class: className,
+  style,
+} = Astro.props;
+
+const name = appName ?? title;
+const showBar = frame !== 'phone' || interactive;
+---
+
+<section
+  class:list={['win', `win--${frame}`, className, { 'win--interactive': interactive }]}
+  data-window={windowId}
+  data-name={name}
+  data-frame={frame}
+  data-tone={tone}
+  aria-label={`${name} preview`}
+  hidden={hidden}
+  style={style}
+  tabindex={interactive ? -1 : undefined}
+>
+  {
+    showBar && (
+      <header class="win-bar" data-drag-handle={interactive ? '' : undefined}>
+        <div class="lights">
+          {interactive ? (
+            <>
+              <button type="button" class="light light--close" data-action="close" aria-label={`close ${name}`}>
+                <svg viewBox="0 0 12 12" aria-hidden="true">
+                  <path d="M3.9 3.9l4.2 4.2M8.1 3.9 3.9 8.1" />
+                </svg>
+              </button>
+              <button type="button" class="light light--min" data-action="minimize" aria-label={`minimize ${name}`}>
+                <svg viewBox="0 0 12 12" aria-hidden="true">
+                  <path d="M3.2 6h5.6" />
+                </svg>
+              </button>
+              <button type="button" class="light light--zoom" data-action="zoom" aria-label={`zoom ${name}`}>
+                <svg viewBox="0 0 12 12" aria-hidden="true" class="fill">
+                  <path d="M3.5 3.5h3.6L3.5 7.1Z M8.5 8.5H4.9L8.5 4.9Z" />
+                </svg>
+              </button>
+            </>
+          ) : (
+            <>
+              <span class="light light--close" />
+              <span class="light light--min" />
+              <span class="light light--zoom" />
+            </>
+          )}
+        </div>
+        {frame === 'browser' && url ? (
+          <div class="urlbar">
+            <Icon name="ph:lock-simple-fill" />
+            <span>{url}</span>
+          </div>
+        ) : (
+          <p class="win-title">{title}</p>
+        )}
+        <div class="bar-end">
+          <slot name="toolbar" />
+        </div>
+      </header>
+    )
+  }
+  {
+    frame === 'phone' ? (
+      <div class="device">
+        <div class="screen">
+          <span class="island" aria-hidden="true" />
+          <div class="statusbar" aria-hidden="true">
+            <span>9:41</span>
+            <span class="status-icons">
+              <Icon name="ph:cell-signal-full-fill" />
+              <Icon name="ph:wifi-high-bold" />
+              <Icon name="ph:battery-full-fill" />
+            </span>
+          </div>
+          <div class="phone-ui">
+            <slot />
+          </div>
+        </div>
+      </div>
+    ) : (
+      <div class="win-body">
+        <slot />
+      </div>
+    )
+  }
+</section>
+
+<style>
+  .win {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: var(--win-bg);
+    color: var(--win-ink);
+    border-radius: 12px;
+    box-shadow: var(--shadow-window);
+    overflow: hidden;
+    font-family: var(--font-body);
+    font-size: 13px;
+    line-height: 1.4;
+    text-align: left;
+    outline: none;
+  }
+
+  .win:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 4px;
+  }
+
+  /* ---- title bar ---- */
+  .win-bar {
+    position: relative;
+    flex: none;
+    display: grid;
+    grid-template-columns: 1fr minmax(0, auto) 1fr;
+    align-items: center;
+    gap: 12px;
+    height: 38px;
+    padding: 0 12px;
+    background: var(--win-bar);
+    border-bottom: 1px solid var(--win-line);
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .lights {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .light {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--c);
+    box-shadow: inset 0 0 0 0.5px rgb(0 0 0 / 0.2);
+  }
+
+  .light--close {
+    --c: #ff5f57;
+  }
+
+  .light--min {
+    --c: #febc2e;
+  }
+
+  .light--zoom {
+    --c: #28c840;
+  }
+
+  button.light::before {
+    content: '';
+    position: absolute;
+    inset: -7px -4px;
+  }
+
+  .light svg {
+    width: 12px;
+    height: 12px;
+    fill: none;
+    stroke: rgb(0 0 0 / 0.55);
+    stroke-width: 1.3;
+    stroke-linecap: round;
+    opacity: 0;
+    transition: opacity 0.12s;
+  }
+
+  .light svg.fill {
+    fill: rgb(0 0 0 / 0.5);
+    stroke: none;
+  }
+
+  .lights:hover .light svg,
+  .light:focus-visible svg {
+    opacity: 1;
+  }
+
+  .light:focus-visible {
+    outline-offset: 2px;
+    border-radius: 50%;
+  }
+
+  .win--interactive:not(.is-active) .light {
+    --c: #d9d3c8;
+  }
+
+  :global(:root[data-theme='dark']) .win--interactive:not(.is-active) .light {
+    --c: #4b463e;
+  }
+
+  .win-title {
+    grid-column: 2;
+    font-weight: 650;
+    font-size: 13px;
+    color: var(--win-ink-2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+  }
+
+  .win--interactive.is-active .win-title {
+    color: var(--win-ink);
+  }
+
+  .win--browser .win-bar {
+    grid-template-columns: 52px minmax(0, 1fr) 52px;
+  }
+
+  .urlbar {
+    grid-column: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    max-width: 340px;
+    margin-inline: auto;
+    min-width: 0;
+    height: 26px;
+    padding: 0 12px;
+    border-radius: 8px;
+    background: var(--win-field);
+    color: var(--win-ink-2);
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .urlbar :global(.icon) {
+    width: 11px;
+    height: 11px;
+  }
+
+  .bar-end {
+    grid-column: 3;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .win-body {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    container-type: inline-size;
+  }
+
+  .win-body > :global(*) {
+    height: 100%;
+  }
+
+  /* ---- phone frame ---- */
+  .win--phone {
+    align-items: center;
+    gap: 10px;
+    background: none;
+    box-shadow: none;
+    border-radius: 0;
+    overflow: visible;
+  }
+
+  .win--phone .win-bar {
+    display: flex;
+    gap: 12px;
+    height: 30px;
+    padding: 0 14px 0 10px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--win-bar);
+    box-shadow: var(--shadow-float);
+  }
+
+  .win--phone .win-title {
+    font-size: 12px;
+  }
+
+  .device {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 9 / 19.2;
+    padding: 3.4%;
+    border-radius: 15% / 7.1%;
+    background: #1c1a16;
+    box-shadow:
+      var(--shadow-window),
+      inset 0 0 0 2px #3a352d;
+  }
+
+  .screen {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 12.5% / 5.9%;
+    background: var(--win-bg);
+    container-type: inline-size;
+  }
+
+  .island {
+    position: absolute;
+    z-index: 6;
+    top: 1.7%;
+    left: 50%;
+    width: 31%;
+    height: 3.3%;
+    translate: -50% 0;
+    border-radius: 999px;
+    background: #000;
+  }
+
+  .statusbar {
+    position: absolute;
+    z-index: 5;
+    inset: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 13cqw;
+    padding: 0 8.5% 0 11%;
+    font-size: 4.4cqw;
+    font-weight: 650;
+    color: var(--win-ink);
+    pointer-events: none;
+  }
+
+  .status-icons {
+    display: flex;
+    align-items: center;
+    gap: 0.3em;
+  }
+
+  .status-icons :global(.icon) {
+    width: 1.1em;
+    height: 1.1em;
+  }
+
+  .phone-ui {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    font-size: 4.8cqw;
+    line-height: 1.35;
+  }
+
+  .phone-ui > :global(*) {
+    height: 100%;
+  }
+</style>

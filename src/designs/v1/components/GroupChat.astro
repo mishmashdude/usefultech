@@ -1,0 +1,187 @@
+---
+// "a group chat that ships": the makers section, told as the collective's group chat.
+import AppIcon from './AppIcon.astro';
+import Icon from '../../../components/Icon.astro';
+import { apps, getApp } from '../data/apps';
+import { site } from '../data/site';
+
+const messages = [
+  { app: 'conscious', text: 'conscious 1.3 is out! the shield now shows how many times you’ve opened an app today' },
+  { app: 'maple', text: 'maple 1.6 is live. bug fixes, and premium just got cheaper' },
+  { app: 'letsrally', text: '120 venues across sydney on the map now. who’s free thursday?' },
+  { app: 'findery', text: 'the waitlist is open. tell your most stylish friend' },
+  { app: 'lingo', text: 'こんにちは! (that means hi)' },
+];
+const thread = messages
+  .map((m) => ({ ...m, app: getApp(m.app) }))
+  .filter((m) => m.app !== undefined);
+---
+
+<div class="chat" data-reveal>
+  <div class="chat-head">
+    <span class="chat-avatars" aria-hidden="true">{apps.map((a) => <AppIcon app={a} size={28} />)}</span>
+    <p>
+      <b>usefultech</b>
+      <small>{apps.length} apps · a few friends</small>
+    </p>
+  </div>
+  <ol class="chat-log" role="list">
+    {
+      thread.map(({ app, text }, i) => (
+        <li class="msg" style={`--i:${i}`} data-tone={app!.tone}>
+          <AppIcon app={app!} size={36} />
+          <p class="bubble">
+            <span class="who">{app!.maker ? `${app!.maker.name} · ${app!.name}` : app!.name}</span>
+            {text}
+          </p>
+        </li>
+      ))
+    }
+    <li class="msg msg--me" style={`--i:${thread.length}`}>
+      <p class="bubble">got an idea for something useful? can i join?</p>
+    </li>
+  </ol>
+  <a class="reply" href={`mailto:${site.email}`}>
+    <span>say hi to the group…</span>
+    <span class="send"><Icon name="ph:arrow-up-bold" /></span>
+  </a>
+</div>
+
+<style>
+  .chat {
+    display: grid;
+    gap: 18px;
+    padding: 18px;
+    border-radius: var(--radius-xl);
+    background: var(--surface);
+    box-shadow:
+      0 0 0 1px var(--line),
+      0 8px 0 0 var(--paper-3);
+  }
+
+  .chat-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 4px 6px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .chat-avatars {
+    display: flex;
+  }
+
+  .chat-avatars :global(.app-icon) {
+    margin-right: -9px;
+    box-sizing: content-box;
+    border: 2px solid var(--surface);
+  }
+
+  .chat-head p {
+    display: grid;
+    margin-left: 10px;
+    line-height: 1.2;
+  }
+
+  .chat-head b {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 1.15rem;
+  }
+
+  .chat-head small {
+    color: var(--ink-3);
+    font-size: 0.88rem;
+  }
+
+  .chat-log {
+    display: grid;
+    gap: 12px;
+  }
+
+  .msg {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    max-width: 92%;
+  }
+
+  .bubble {
+    padding: 10px 14px 11px;
+    border-radius: 20px 20px 20px 6px;
+    background: var(--tone-soft);
+    color: var(--tone-ink);
+    font-size: 0.98rem;
+    line-height: 1.4;
+  }
+
+  .who {
+    display: block;
+    margin-bottom: 2px;
+    font-family: var(--font-display);
+    font-weight: 850;
+    font-size: 0.8rem;
+    color: var(--tone-text);
+  }
+
+  .msg--me {
+    justify-self: end;
+  }
+
+  .msg--me .bubble {
+    border-radius: 20px 20px 6px 20px;
+    background: var(--brand);
+    color: var(--on-brand);
+    font-weight: 600;
+  }
+
+  :global(.js) .chat:not(.is-in) .msg {
+    opacity: 0;
+  }
+
+  .chat.is-in .msg {
+    animation: msg-in 0.45s var(--ease-spring) both;
+    animation-delay: calc(var(--i) * 260ms + 150ms);
+  }
+
+  @keyframes msg-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px) scale(0.94);
+    }
+  }
+
+  .reply {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    height: 52px;
+    padding: 0 6px 0 20px;
+    border-radius: 999px;
+    background: var(--paper-2);
+    color: var(--ink-3);
+    transition: background-color 0.15s;
+  }
+
+  .reply:hover {
+    background: var(--paper-3);
+    color: var(--ink-2);
+  }
+
+  .send {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--brand);
+    color: var(--on-brand);
+    box-shadow: 0 3px 0 var(--brand-deep);
+  }
+
+  .send :global(.icon) {
+    width: 18px;
+    height: 18px;
+  }
+</style>
