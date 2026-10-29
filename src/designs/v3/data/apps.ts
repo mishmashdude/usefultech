@@ -4,9 +4,8 @@ import { categories } from './categories';
 // ---------------------------------------------------------------------------
 // The apps, with their real screenshots (src/assets/screens).
 // Maple + Conscious: from their App Store listings. Let's Rally + The Findery:
-// captures of the live sites. Add an app = add an entry (and its screenshots).
-//
-// TODO: "Lingo" is a working name with no public screens or link yet.
+// captures of the live sites. SayLens: a simulator capture of the app reading a
+// Chinese menu. Add an app = add an entry (and its screenshots).
 // ---------------------------------------------------------------------------
 
 const files = import.meta.glob<{ default: ImageMetadata }>('../../../assets/screens/*.{jpg,png}', { eager: true });
@@ -156,21 +155,35 @@ export const apps: App[] = [
     ],
   },
   {
-    slug: 'lingo', // working name
-    name: 'Lingo',
-    tagline: 'Talk to anyone, in any language.',
-    description: 'Translate text, menus and conversations, with help saying it out loud.',
+    slug: 'saylens',
+    name: 'SayLens',
+    tagline: 'Point at Chinese. See how to say it.',
+    description: 'Tone-coloured pinyin, or Cantonese romanization, appears over a menu or sign so you can say it out loud.',
     categories: ['language', 'travel'],
     platforms: ['iPhone'],
     status: 'live',
-    icon: { glyph: 'ph:translate' },
+    maker: { name: 'Andi' },
+    link: { label: 'App Store', href: 'https://apps.apple.com/app/saylens-language-camera/id6821531032' },
+    icon: { image: img('saylens-icon.jpg') },
     frame: 'phone',
-    screens: [],
-    gallery: [],
+    screens: [
+      {
+        src: img('saylens-menu.jpg'),
+        alt: 'SayLens: a Chinese menu with tone-coloured pinyin over each dish',
+        kind: 'phone',
+      },
+    ],
+    gallery: [
+      {
+        src: img('saylens-menu.jpg'),
+        alt: 'SayLens: a Chinese menu with tone-coloured pinyin over each dish',
+        kind: 'phone',
+      },
+    ],
     features: [
-      { icon: 'ph:microphone', title: 'Conversation mode', body: 'Both sides, turn by turn.' },
-      { icon: 'ph:camera', title: 'Camera', body: 'Point at menus and signs.' },
-      { icon: 'ph:speaker-high', title: 'Pronunciation', body: 'Phonetics and slow playback.' },
+      { icon: 'ph:camera', title: 'On the photo', body: 'Pinyin sits on each line of the menu or sign.' },
+      { icon: 'ph:hand-tap', title: 'Tap a line', body: 'The meaning, and a voice to hear it.' },
+      { icon: 'ph:lock-simple', title: 'On your iPhone', body: 'Reading stays on the device.' },
     ],
   },
   {

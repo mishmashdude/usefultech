@@ -78,6 +78,7 @@ Where the current images came from:
 
 - Maple and Conscious: their App Store listings. `maple-screen-*.jpg` are the phone screens cropped out of Maple's marketing images.
 - Let's Rally and The Findery: captures of letsrally.cc and thefindery.app. `hero-map.jpg` is the Let's Rally capture, cropped.
+- SayLens: `saylens-menu.jpg` is the app reading a Chinese menu, with tone-coloured pinyin on the photo. `saylens-icon.jpg` is the app icon.
 
 Swap in fresh exports any time: keep the file names, or update `apps.ts`.
 
@@ -106,6 +107,5 @@ Once you settle on design N, make it the whole site:
 
 ## Still to fill in
 
-- [ ] "Lingo" is a working name: real name, link, maker and screens
 - [ ] makers for Let's Rally and The Findery (`maker` in `apps.ts`)
 - [ ] an app icon for The Findery (design 3 shows a "TF" monogram)

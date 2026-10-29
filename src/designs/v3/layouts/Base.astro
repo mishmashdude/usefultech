@@ -45,6 +45,31 @@ const fullTitle = title ? `${title} · ${site.name}` : `${site.name} · ${site.t
         } catch {}
         const dark = stored ? stored === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
         root.dataset.theme = dark ? 'dark' : 'light';
+
+        // registered in the head so it runs before the new page is snapshotted
+        // these fire on the window, and they do not bubble
+        window.addEventListener('pagereveal', (e) => {
+          if (!e.viewTransition) return;
+          root.classList.add('vt');
+          // PageRevealEvent.activation is missing in some Chromium builds; the
+          // Navigation API has the same record once the new page is revealed.
+          const fromUrl = (e.activation ?? window.navigation?.activation)?.from?.url;
+          if (!fromUrl) return;
+          const slug = new URL(fromUrl).pathname.match(/\/apps\/([^/]+)\/?$/)?.[1];
+          if (!slug) return;
+          const card = document.querySelector(`[data-app-stage="${CSS.escape(slug)}"]`);
+          if (!(card instanceof HTMLElement)) return;
+          card.style.setProperty('view-transition-name', `app-stage-${slug}`);
+          card.style.setProperty('view-transition-class', 'app-stage');
+        });
+
+        window.addEventListener('pageswap', (e) => {
+          const hero = document.querySelector('[data-app-hero]');
+          if (!(hero instanceof HTMLElement) || !e.viewTransition) return;
+          const destUrl = e.activation?.entry?.url;
+          if (!destUrl) return;
+          if (!new URL(destUrl).pathname.includes('/v3')) hero.style.setProperty('view-transition-name', 'none');
+        });
       })();
     </script>
   </head>
@@ -114,6 +139,24 @@ const fullTitle = title ? `${title} · ${site.name}` : `${site.name} · ${site.t
         { rootMargin: '0px 0px -8% 0px', threshold: 0.06 },
       );
       document.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
+
+      // name only the card that was clicked, so the others stay in the page fade
+      // and this one resizes into the app hero
+      document.addEventListener(
+        'click',
+        (e) => {
+          if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+          const link = e.target instanceof Element ? e.target.closest('a') : null;
+          if (!link || link.target === '_blank' || link.origin !== location.origin) return;
+          const card = link.closest('[data-app-stage]');
+          if (!(card instanceof HTMLElement)) return;
+          const slug = card.dataset.appStage;
+          if (!slug) return;
+          card.style.setProperty('view-transition-name', `app-stage-${slug}`);
+          card.style.setProperty('view-transition-class', 'app-stage');
+        },
+        true,
+      );
     </script>
   </body>
 </html>

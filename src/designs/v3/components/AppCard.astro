@@ -24,7 +24,10 @@ const meta = [home?.name, app.platforms.join(', '), app.status === 'soon' ? 'Com
   .join(' · ');
 ---
 
-<article class:list={['card', `card--${size}`, `card--${app.frame}`, { 'card--empty': !first }]}>
+<article
+  class:list={['card', `card--${size}`, `card--${app.frame}`, { 'card--empty': !first }]}
+  data-app-stage={app.slug}
+>
   <div class="media" aria-hidden="true">
     {
       !first ? (

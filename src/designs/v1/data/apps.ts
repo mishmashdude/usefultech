@@ -1,11 +1,11 @@
+import { root } from '../../../lib/paths';
 import { categories, type Tone } from './categories';
 
 // ---------------------------------------------------------------------------
 // The apps. Everything in design 1 (home page, desktop, categories, app pages)
 // is generated from this list, so adding an app = adding an entry here.
 //
-// TODO: lingo is a working name with placeholder copy (no link yet), and the
-// commented-out makers need real names.
+// TODO: the commented-out makers need real names.
 // ---------------------------------------------------------------------------
 
 export interface Feature {
@@ -161,40 +161,42 @@ export const apps: App[] = [
     window: { title: 'conscious', width: 290, height: 600 },
   },
   {
-    slug: 'lingo', // working name: swap in the real one
-    name: 'lingo',
-    kind: 'translator',
-    tagline: 'talk to anyone, anywhere, in your own words.',
+    slug: 'saylens',
+    name: 'saylens',
+    kind: 'language camera',
+    tagline: 'point at chinese, and see how to say it.',
     description:
-      'lingo translates text, menus and real conversations, with pronunciation help so you can actually say it out loud.',
+      'saylens reads a menu or a sign and puts tone-coloured pinyin, or cantonese romanization, right on the photo.',
     categories: ['language', 'travel'],
     tone: 'butter',
-    icon: 'ph:chat-circle-dots-fill',
+    icon: 'ph:camera-fill',
+    iconImage: `${root}/icons/saylens.jpg`,
     platforms: ['iPhone'],
     status: 'live',
-    // maker: { name: '' }, // TODO: add the maker
-    link: { label: 'get lingo', href: '#' },
-    highlights: ['conversation mode', 'camera translate', 'phrasebook'],
+    maker: { name: 'andi' },
+    link: { label: 'get saylens', href: 'https://apps.apple.com/app/saylens-language-camera/id6821531032' },
+    highlights: ['pinyin on the photo', 'cantonese too', 'tap a line to hear it'],
     features: [
       {
-        icon: 'ph:microphone-fill',
-        title: 'conversation mode',
-        body: 'talk naturally and lingo translates both sides, turn by turn.',
-      },
-      {
         icon: 'ph:camera-fill',
-        title: 'point and translate',
-        body: 'menus, signs and labels, translated right on your camera.',
+        title: 'on the photo',
+        body: 'point at a menu or a sign and the pronunciation sits on each line.',
       },
       {
-        icon: 'ph:speaker-high-fill',
-        title: 'say it right',
-        body: 'phonetic spelling and slow playback for every phrase you save.',
+        icon: 'ph:hand-tap-fill',
+        title: 'tap a line',
+        body: 'the meaning opens, and you can hear it spoken.',
+      },
+      {
+        icon: 'ph:lock-fill',
+        title: 'on your iphone',
+        body: 'the reading happens on the device. nothing is sent off.',
       },
     ],
-    toast: { icon: 'ph:star-fill', title: 'saved to phrasebook', text: '“where’s the nearest station?”' },
+    toast: { icon: 'ph:translate-fill', title: 'gōng bǎo jī dīng', text: '宫保鸡丁, right on the menu' },
     frame: 'phone',
-    window: { title: 'lingo', width: 290, height: 600 },
+    window: { title: 'saylens', width: 290, height: 600 },
+    screenshot: `${root}/screens/saylens.jpg`,
   },
   {
     slug: 'findery',

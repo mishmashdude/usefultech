@@ -32,7 +32,11 @@ const more = apps
 
 <Base title={app.name} description={`${app.name}: ${app.tagline}`} current="apps" padTop={false}>
   <section class="hero" aria-labelledby="app-title">
-    <div class:list={['hero-card', `hero-card--${app.frame}`, { 'hero-card--empty': !center }]}>
+    <div
+      class:list={['hero-card', `hero-card--${app.frame}`, { 'hero-card--empty': !center }]}
+      data-app-hero
+      style={`view-transition-name:app-stage-${app.slug};view-transition-class:app-stage`}
+    >
       <div class="media" aria-hidden="true">
         {
           !center ? (

@@ -1,10 +1,9 @@
+import { root } from '../../../lib/paths';
 import { categories } from './categories';
 
 // ---------------------------------------------------------------------------
 // The apps. Everything on the site (desktop, home, categories, app pages)
 // is generated from this list, so adding an app = adding an entry here.
-//
-// TODO: "Lingo" is a working name with placeholder copy and no link yet.
 // ---------------------------------------------------------------------------
 
 export interface Feature {
@@ -105,22 +104,26 @@ export const apps: App[] = [
     window: { title: 'Conscious', width: 290, height: 600 },
   },
   {
-    slug: 'lingo', // working name
-    name: 'Lingo',
-    tagline: 'Talk to anyone, in any language.',
-    description: 'Translate text, menus and conversations, with help saying it out loud.',
+    slug: 'saylens',
+    name: 'SayLens',
+    tagline: 'Point at Chinese. See how to say it.',
+    description: 'Tone-coloured pinyin, or Cantonese romanization, appears over a menu or sign so you can say it out loud.',
     categories: ['language', 'travel'],
-    accent: ['#0e8577', '#4fc4b4'],
-    icon: 'ph:translate-fill',
+    accent: ['#6a55ed', '#c3b6f7'],
+    icon: 'ph:camera-fill',
+    iconImage: `${root}/icons/saylens.jpg`,
     platforms: ['iPhone'],
     status: 'live',
+    maker: { name: 'Andi' },
+    link: { label: 'App Store', href: 'https://apps.apple.com/app/saylens-language-camera/id6821531032' },
     features: [
-      { icon: 'ph:microphone', title: 'Conversation mode', body: 'Both sides, turn by turn.' },
-      { icon: 'ph:camera', title: 'Camera', body: 'Point at menus and signs.' },
-      { icon: 'ph:speaker-high', title: 'Pronunciation', body: 'Phonetics and slow playback.' },
+      { icon: 'ph:camera', title: 'On the photo', body: 'Pinyin sits on each line of the menu or sign.' },
+      { icon: 'ph:hand-tap', title: 'Tap a line', body: 'The meaning, and a voice to hear it.' },
+      { icon: 'ph:lock-simple', title: 'On your iPhone', body: 'Reading stays on the device.' },
     ],
     frame: 'phone',
-    window: { title: 'Lingo', width: 290, height: 600 },
+    window: { title: 'SayLens', width: 290, height: 600 },
+    screenshot: `${root}/screens/saylens.jpg`,
   },
   {
     slug: 'findery',

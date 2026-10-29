@@ -386,13 +386,42 @@ a:hover > .glass::before {
   transform: none;
 }
 
+/* a cross-document navigation snapshots the new page immediately. entrance
+   animations start at opacity 0, so that snapshot is a blank flash. skip them. */
+html.vt .rise,
+html.vt.js [data-reveal] {
+  animation: none;
+  transition: none;
+  opacity: 1;
+  transform: none;
+}
+
 @view-transition {
   navigation: auto;
 }
 
+/* the page fades; the clicked card is pulled out of that fade and resizes
+   into the app hero (see Base.astro, which names the card on the way out) */
+::view-transition-group(*) {
+  animation-duration: 0.6s;
+  animation-timing-function: var(--ease);
+}
+
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 0.22s;
+  animation-duration: 0.45s;
+  animation-timing-function: var(--ease);
+}
+
+::view-transition-old(.app-stage),
+::view-transition-new(.app-stage) {
+  height: 100%;
+  overflow: clip;
+  border-radius: 36px;
+  object-fit: cover;
+  object-position: center top;
+  animation-duration: 0.4s;
+  animation-timing-function: var(--ease);
 }
 
 @media (prefers-reduced-motion: reduce) {
