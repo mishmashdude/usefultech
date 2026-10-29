@@ -1,0 +1,176 @@
+---
+// The first hero: real screens over a grayscale court map, copy in a glass panel.
+import { Image } from 'astro:assets';
+import Icon from '../../../../components/Icon.astro';
+import Screen from '../Screen.astro';
+import { apps, getApp, heroMap } from '../../data/apps';
+import { to } from '../../base';
+
+const heroPhones = [getApp('maple'), getApp('conscious')].flatMap((a) => (a?.screens[0] ? [a.screens[0]] : []));
+---
+
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-card">
+    <Image class="hero-map" src={heroMap} alt="" widths={[960, 1440, 2000, 2400]} sizes="100vw" loading="eager" />
+    <div class="hero-shade" aria-hidden="true"></div>
+
+    <div class="hero-phones" aria-hidden="true">
+      {heroPhones.map((shot, i) => <Screen shot={shot} class={`hp hp--${i + 1}`} eager sizes="(min-width: 1000px) 270px, 38vw" />)}
+    </div>
+
+    <div class="hero-copy glass rise">
+      <p class="label">usefultech · {apps.length} apps · made by friends</p>
+      <h1 id="hero-title" class="display">Apps that support your life.</h1>
+      <div class="hero-actions">
+        <a class="btn btn--solid" href="#apps">Explore apps</a>
+        <a class="btn btn--glass glass" href={to('/categories')}>Categories</a>
+      </div>
+    </div>
+
+    <p class="hero-note glass" aria-hidden="true"><Icon name="ph:map-pin" />Live courts in Sydney, from Let’s Rally</p>
+  </div>
+</section>
+
+<style>
+  /* ---- hero ---- */
+  .hero {
+    padding: 10px var(--gutter) 0;
+  }
+
+  .hero-card {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    height: clamp(620px, 94svh, 940px);
+    border-radius: 40px;
+    background: var(--stage);
+  }
+
+  .hero-card :global(.hero-map) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(1) contrast(0.78) brightness(1.1) blur(0.6px);
+    transform: scale(1.06);
+  }
+
+  :global(:root[data-theme='dark']) .hero-card :global(.hero-map) {
+    filter: grayscale(1) invert(0.92) contrast(0.7) brightness(0.9) blur(0.6px);
+  }
+
+  .hero-shade {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to top, color-mix(in oklab, var(--bg) 78%, transparent), transparent 55%),
+      linear-gradient(to bottom, color-mix(in oklab, var(--bg) 55%, transparent), transparent 26%),
+      color-mix(in oklab, var(--bg) 18%, transparent);
+  }
+
+  .hero-phones {
+    position: absolute;
+    right: clamp(16px, 6vw, 110px);
+    bottom: -12%;
+    display: flex;
+    align-items: flex-end;
+    gap: clamp(12px, 2vw, 26px);
+  }
+
+  .hero-phones :global(.hp) {
+    width: clamp(150px, 19vw, 270px);
+  }
+
+  .hero-phones :global(.hp--1) {
+    translate: 0 70px;
+  }
+
+  .hero-copy {
+    position: absolute;
+    left: clamp(12px, 2vw, 24px);
+    bottom: clamp(12px, 2vw, 24px);
+    display: grid;
+    gap: 18px;
+    max-width: min(640px, calc(100% - 24px));
+    padding: clamp(22px, 3vw, 34px);
+    border-radius: 32px;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 6px;
+  }
+
+  .hero-note {
+    position: absolute;
+    top: 86px;
+    right: 22px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    color: var(--ink-2);
+  }
+
+  .hero-note :global(.icon) {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* mid widths: lift the phones above the glass panel */
+  @media (max-width: 1199px) and (min-width: 721px) {
+    .hero-phones {
+      top: 100px;
+      bottom: auto;
+      right: clamp(16px, 4vw, 48px);
+    }
+
+    .hero-phones :global(.hp) {
+      width: clamp(150px, 23vw, 220px);
+    }
+
+    .hero-phones :global(.hp--1) {
+      translate: 0 40px;
+    }
+
+    .hero-copy {
+      max-width: 540px;
+    }
+
+    .hero-note {
+      display: none;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .hero-card {
+      height: clamp(620px, 90svh, 760px);
+      border-radius: 32px;
+    }
+
+    .hero-phones {
+      left: 50%;
+      right: auto;
+      top: 92px;
+      bottom: auto;
+      translate: -50% 0;
+    }
+
+    .hero-phones :global(.hp) {
+      width: 40vw;
+    }
+
+    .hero-phones :global(.hp--1) {
+      translate: 0 28px;
+    }
+
+    .hero-note {
+      display: none;
+    }
+  }
+</style>

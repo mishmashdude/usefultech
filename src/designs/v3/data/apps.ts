@@ -35,6 +35,8 @@ export interface Feature {
 export interface App {
   slug: string;
   name: string;
+  /** a shorter name for tight spots, like the category previews (defaults to the name) */
+  shortName?: string;
   /** one short line */
   tagline: string;
   /** one sentence, shown on the app's page */

@@ -1,0 +1,137 @@
+---
+// Hero option C: the categories are the headline. Each one carries the icon
+// of a real app in it and links to its page.
+import Icon from '../../../../components/Icon.astro';
+import AppIcon from '../AppIcon.astro';
+import { apps, appsIn } from '../../data/apps';
+import { categories } from '../../data/categories';
+import { site } from '../../data/site';
+import { to } from '../../base';
+
+// the app that stands for each category: one that calls it home, else any
+const items = categories.map((c) => ({
+  ...c,
+  app: apps.find((a) => a.categories[0] === c.slug) ?? appsIn(c.slug)[0],
+}));
+---
+
+<section class="hero" aria-labelledby="hero-title">
+  <p class="kicker rise">{site.tagline}</p>
+  {/* kept on single lines on purpose: whitespace here would show up before the commas */}
+  <h1 id="hero-title" class="headline rise" style="--d: 80ms">
+    Useful apps for {
+      items.map((c, i) => (
+        <>{i === items.length - 1 ? ' and ' : i > 0 ? ', ' : ''}<a class="cat" href={to(`/categories/${c.slug}`)} style={`--tilt:${i % 2 ? 7 : -7}deg`}>{c.app && <span class="ico"><AppIcon app={c.app} size={96} /></span>}<span class="word">{c.name.toLowerCase()}</span></a></>
+      ))
+    }.
+  </h1>
+  <div class="actions rise" style="--d: 220ms">
+    <a class="btn btn--solid btn--lg" href="#apps">Explore apps <Icon name="ph:arrow-down" /></a>
+    <a class="btn btn--glass btn--lg glass" href={to('/categories')}>Browse categories</a>
+  </div>
+  <p class="note rise" style="--d: 300ms">{apps.length} apps so far, each made by a friend.</p>
+</section>
+
+<style>
+  .hero {
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 30px;
+    min-height: clamp(540px, 76svh, 800px);
+    padding: 140px var(--gutter) 48px;
+    text-align: center;
+  }
+
+  .kicker {
+    padding: 8px 15px;
+    border-radius: 999px;
+    background: var(--stage);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--ink-2);
+  }
+
+  /* the filler words are grey, so the categories carry the line */
+  .headline {
+    max-width: 1180px;
+    font-size: clamp(2.5rem, 0.5rem + 5.6vw, 6.6rem);
+    font-weight: 600;
+    letter-spacing: -0.055em;
+    line-height: 1.04;
+    color: var(--ink-3);
+    text-wrap: balance;
+  }
+
+  .cat {
+    white-space: nowrap;
+    color: var(--ink);
+    border-radius: 0.14em;
+  }
+
+  .ico {
+    display: inline-block;
+    overflow: hidden;
+    width: 0.84em;
+    height: 0.84em;
+    margin: 0 0.1em 0 0.04em;
+    border-radius: 22.37%;
+    vertical-align: -0.1em;
+    box-shadow: 0 0.1em 0.3em -0.12em rgb(0 0 0 / 0.35);
+    transition: transform 0.45s var(--ease);
+  }
+
+  /* a block, so monogram and glyph tiles don't sit on the text baseline */
+  .ico :global(.app-icon) {
+    --s: 100% !important;
+    display: grid;
+    box-shadow: none;
+  }
+
+  .cat:hover .ico {
+    transform: rotate(var(--tilt)) scale(1.08);
+  }
+
+  /* an underline that draws in on hover */
+  .word {
+    background: linear-gradient(currentColor, currentColor) no-repeat 0 94% / 0 0.055em;
+    transition: background-size 0.45s var(--ease);
+  }
+
+  .cat:hover .word {
+    background-size: 100% 0.055em;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  .actions .btn--solid:hover :global(.icon) {
+    transform: translateY(2px);
+  }
+
+  .note {
+    font-size: 0.875rem;
+    color: var(--ink-3);
+  }
+
+  @media (max-width: 720px) {
+    .hero {
+      min-height: 0;
+      gap: 24px;
+      padding-top: 120px;
+    }
+
+    .actions {
+      width: 100%;
+    }
+
+    .actions .btn {
+      flex: 1 1 auto;
+    }
+  }
+</style>

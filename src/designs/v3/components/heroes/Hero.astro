@@ -1,0 +1,26 @@
+---
+// Renders one of the hero options by name.
+import HeroStatement from './HeroStatement.astro';
+import HeroRotate from './HeroRotate.astro';
+import HeroInline from './HeroInline.astro';
+import HeroIndex from './HeroIndex.astro';
+import HeroCombined from './HeroCombined.astro';
+import HeroOriginal from './HeroOriginal.astro';
+import type { HeroSlug } from './heroes';
+
+interface Props {
+  variant: HeroSlug;
+}
+
+const components = {
+  statement: HeroStatement,
+  rotate: HeroRotate,
+  inline: HeroInline,
+  index: HeroIndex,
+  combined: HeroCombined,
+  original: HeroOriginal,
+};
+const Component = components[Astro.props.variant];
+---
+
+<Component />

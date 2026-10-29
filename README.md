@@ -35,6 +35,22 @@ The site currently holds three design directions side by side. `/` is a chooser,
 
 Each design has the same pages: `/vN/`, `/vN/categories`, `/vN/categories/<slug>` and `/vN/apps/<slug>`.
 
+### Design 3: hero options (temporary)
+
+Design 3's home page has six hero options while one gets picked. Each has its own page, and the pill in the bottom-right corner flips between them:
+
+| URL | Option |
+| --- | --- |
+| `/v3/hero/statement/` | A · one big centred line over a slow liquid backdrop, category pills below |
+| `/v3/hero/rotate/` | B · dark card; the last word cycles through the categories and lights up its pill |
+| `/v3/hero/inline/` | C · the categories are the headline, each with a real app icon |
+| `/v3/hero/index/` | D · a giant category index; hovering one shows its app |
+| `/v3/hero/combined/` | E · B's rotating tagline on A's light card; pointing at a pill previews its apps (the default) |
+| `/v3/hero/original/` | the first version, with screens over a map |
+
+`/v3/` shows `defaultHero` from `src/designs/v3/components/heroes/heroes.ts`.
+To settle on one: set `defaultHero`, then delete the other `Hero*.astro` files (and their entries in `Hero.astro`), `HeroSwitcher.astro` and `src/pages/v3/hero/`.
+
 ## Where things live
 
 ```
@@ -55,6 +71,8 @@ Internal links go through `to()` from the design's `base.ts`, which adds the `/v
 - `kind` is `phone` (a raw iPhone screen), `store` (an App Store image) or `browser` (a website capture, framed in a window).
 - Icons: `icon: { image: img('…') }`, or a `monogram`, or a Phosphor `glyph`.
 - An app without screens shows "Screens coming soon".
+- `shortName` (optional) is used where space is tight, like the hero's category previews.
+- Each category in `categories.ts` has a `word` for the hero tagline ("Apps that support your travels"). New categories just need one; they get a pill and a turn in the rotation automatically.
 
 Where the current images came from:
 

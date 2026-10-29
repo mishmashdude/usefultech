@@ -1,0 +1,20 @@
+---
+// One page per hero option, for comparing them (see heroes.ts).
+import type { GetStaticPaths } from 'astro';
+import Base from '../../../designs/v3/layouts/Base.astro';
+import Hero from '../../../designs/v3/components/heroes/Hero.astro';
+import HeroSwitcher from '../../../designs/v3/components/heroes/HeroSwitcher.astro';
+import HomeSections from '../../../designs/v3/components/HomeSections.astro';
+import { heroes } from '../../../designs/v3/components/heroes/heroes';
+
+export const getStaticPaths = (() =>
+  heroes.map((hero) => ({ params: { variant: hero.slug }, props: { hero } }))) satisfies GetStaticPaths;
+
+const { hero } = Astro.props;
+---
+
+<Base title={`Hero ${hero.short}: ${hero.name}`} current="home" padTop={false}>
+  <Hero variant={hero.slug} />
+  <HomeSections />
+  <HeroSwitcher current={hero.slug} />
+</Base>

@@ -1,0 +1,130 @@
+---
+// The home page below the hero: the apps bento, the category index and about.
+import Icon from '../../../components/Icon.astro';
+import AppCard from './AppCard.astro';
+import CategoryIndex from './CategoryIndex.astro';
+import { apps, getApp } from '../data/apps';
+import { site } from '../data/site';
+import { to } from '../base';
+
+// bento order + sizes; apps not listed here are added at the end
+const layout: [string, 'wide' | 'tall' | 'full'][] = [
+  ['maple', 'tall'],
+  ['findery', 'wide'],
+  ['letsrally', 'wide'],
+  ['conscious', 'tall'],
+  ['lingo', 'full'],
+];
+const placed = layout.flatMap(([slug, size]) => {
+  const app = getApp(slug);
+  return app ? [{ app, size }] : [];
+});
+const rest = apps.filter((a) => !layout.some(([s]) => s === a.slug)).map((app) => ({ app, size: 'tall' as const }));
+const bento = [...placed, ...rest];
+
+const makers = [...new Set(apps.flatMap((a) => (a.maker ? [a.maker.name] : [])))];
+---
+
+<section class="section section--apps" id="apps" aria-labelledby="apps-title">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <div>
+        <p class="label">Index</p>
+        <h2 id="apps-title" class="title">The apps</h2>
+      </div>
+      <a class="link" href={to('/categories')}>By category <Icon name="ph:arrow-right" /></a>
+    </div>
+    <ul class="bento" role="list">
+      {
+        bento.map(({ app, size }, i) => (
+          <li class={`b-${size}`} data-reveal style={`--d:${(i % 2) * 90}ms`}>
+            <AppCard app={app} size={size} morph />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<section class="section section--tight" id="categories" aria-labelledby="cat-title">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <div>
+        <p class="label">Browse</p>
+        <h2 id="cat-title" class="title">Categories</h2>
+      </div>
+    </div>
+    <div data-reveal>
+      <CategoryIndex />
+    </div>
+  </div>
+</section>
+
+<section class="section" id="about" aria-labelledby="about-title">
+  <div class="container about" data-reveal>
+    <h2 id="about-title" class="label">About</h2>
+    <p class="statement">
+      A small collective of independent apps. <span class="muted">Each one built by the friend who needed it.</span>
+    </p>
+    {makers.length > 0 && <p class="makers">Made by {makers.join(', ')} and friends.</p>}
+    <a class="btn btn--glass glass" href={`mailto:${site.email}`}>Say hi <Icon name="ph:arrow-up-right" /></a>
+  </div>
+</section>
+
+<style>
+  /* ---- apps ---- */
+  .bento {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .b-wide {
+    grid-column: span 8;
+  }
+
+  .b-tall {
+    grid-column: span 4;
+  }
+
+  .b-full {
+    grid-column: span 12;
+  }
+
+  @media (max-width: 960px) {
+    .b-wide,
+    .b-tall,
+    .b-full {
+      grid-column: span 12;
+    }
+  }
+
+  /* close under the hero, so the apps peek in on the first screen */
+  .section--apps {
+    padding-top: clamp(40px, 5vw, 72px);
+  }
+
+  .section--tight {
+    padding-top: 0;
+  }
+
+  /* ---- about ---- */
+  .about {
+    display: grid;
+    justify-items: start;
+    gap: 22px;
+  }
+
+  .statement {
+    max-width: 19em;
+    font-size: clamp(1.9rem, 1.2rem + 2.6vw, 3.6rem);
+    font-weight: 600;
+    letter-spacing: -0.05em;
+    line-height: 1.02;
+    text-wrap: balance;
+  }
+
+  .makers {
+    color: var(--ink-3);
+  }
+</style>

@@ -1,0 +1,89 @@
+---
+// A big rounded light card with three soft blobs drifting slowly behind its
+// content, so the glass on top has something to bend. Only the blob layer is
+// clipped, so popovers inside the card can spill over its edge.
+---
+
+<div class="stage">
+  <div class="liquid" aria-hidden="true"><span></span><span></span><span></span></div>
+  <slot />
+</div>
+
+<style>
+  .stage {
+    --blob-1: #ffffff;
+    --blob-2: #c4c4bf;
+    --blob-3: #f6f6f3;
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    place-items: center;
+    min-height: clamp(560px, 78svh, 800px);
+    padding: 128px clamp(16px, 4vw, 48px) 64px;
+    border-radius: 40px;
+    background: var(--stage);
+  }
+
+  :global(:root[data-theme='dark']) .stage {
+    --blob-1: #2e2e2d;
+    --blob-2: #040404;
+    --blob-3: #252524;
+  }
+
+  .liquid {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    border-radius: inherit;
+  }
+
+  .liquid span {
+    position: absolute;
+    width: 58%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    filter: blur(70px);
+    animation: drift 24s ease-in-out infinite alternate;
+  }
+
+  .liquid span:nth-child(1) {
+    left: -12%;
+    top: -26%;
+    background: var(--blob-1);
+  }
+
+  .liquid span:nth-child(2) {
+    right: -16%;
+    top: 14%;
+    background: var(--blob-2);
+    animation-duration: 30s;
+    animation-direction: alternate-reverse;
+  }
+
+  .liquid span:nth-child(3) {
+    left: 20%;
+    bottom: -48%;
+    background: var(--blob-3);
+    animation-duration: 36s;
+  }
+
+  @keyframes drift {
+    50% {
+      transform: translate(6%, 8%) scale(1.08);
+    }
+
+    100% {
+      transform: translate(-4%, 4%) scale(0.96);
+    }
+  }
+
+  @media (max-width: 720px) {
+    .stage {
+      min-height: 0;
+      padding: 116px 16px 36px;
+      border-radius: 32px;
+    }
+  }
+</style>

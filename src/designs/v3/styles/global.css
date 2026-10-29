@@ -8,6 +8,8 @@
   color-scheme: light;
 
   --font: 'Geist Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Roboto, sans-serif;
+  /* an italic accent, only loaded where a page uses it */
+  --serif: 'Instrument Serif', 'Iowan Old Style', 'Times New Roman', serif;
 
   --bg: #f3f3f1;
   --surface: #ffffff;
@@ -325,6 +327,17 @@ a:hover > .glass::before {
   height: 38px;
   padding: 0 16px;
   font-size: 0.875rem;
+}
+
+.btn--lg {
+  height: 56px;
+  padding: 0 28px;
+  font-size: 1.0625rem;
+}
+
+.btn--lg .icon {
+  width: 18px;
+  height: 18px;
 }
 
 .link {

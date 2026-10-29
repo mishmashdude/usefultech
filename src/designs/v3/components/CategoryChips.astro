@@ -1,0 +1,311 @@
+---
+// The categories as glass pills, each linking to its page.
+// With `preview`, pointing at a pill (or tabbing to it) shows a small glass
+// card with that category's apps, which glides from pill to pill.
+import Icon from '../../../components/Icon.astro';
+import AppIcon from './AppIcon.astro';
+import { categories } from '../data/categories';
+import { appsIn } from '../data/apps';
+import { to } from '../base';
+
+interface Props {
+  /** stagger the pills in on load, starting after `delay` ms */
+  rise?: boolean;
+  delay?: number;
+  /** show each category's apps when pointing at its pill */
+  preview?: boolean;
+  /** on phones: one row that scrolls sideways instead of wrapping */
+  scroll?: boolean;
+}
+
+const { rise = false, delay = 0, preview = false, scroll = false } = Astro.props;
+const items = categories.map((c) => ({ ...c, apps: appsIn(c.slug) }));
+const plural = (n: number) => (n === 1 ? 'app' : 'apps');
+---
+
+<div class:list={['chips-wrap', { 'chips-wrap--scroll': scroll }]} data-chips-preview={preview ? '' : undefined}>
+  <ul class="chips" role="list" aria-label="Categories">
+    {
+      items.map((c, i) => (
+        <li class:list={{ rise }} style={rise ? `--d:${delay + i * 45}ms` : undefined}>
+          <a class="chip glass" href={to(`/categories/${c.slug}`)} data-cat={c.slug}>
+            <Icon name={c.icon} />
+            {c.name}
+            <span class="count">
+              <span class="sr-only">, </span>
+              {c.apps.length}
+              <span class="sr-only"> {plural(c.apps.length)}</span>
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+
+  {
+    preview && (
+      <div class="peek glass" aria-hidden="true" data-peek>
+        {items.map((c) => (
+          <div class="peek-panel" data-for={c.slug}>
+            <p class="peek-head">
+              {c.name} <span>· {c.apps.length} {plural(c.apps.length)}</span>
+            </p>
+            <ul class="peek-apps" role="list" style={`--cols:${Math.min(Math.max(c.apps.length, 1), 5)}`}>
+              {c.apps.map((a) => (
+                <li>
+                  <AppIcon app={a} size={44} />
+                  <span class="peek-name">{a.shortName ?? a.name}</span>
+                  {a.status === 'soon' && <span class="peek-soon">Soon</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    )
+  }
+</div>
+
+<style>
+  .chips-wrap {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 48px;
+    padding: 0 18px 0 15px;
+    border-radius: 999px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    color: var(--ink);
+    transition:
+      transform 0.25s var(--ease),
+      background-color 0.3s var(--ease),
+      color 0.3s var(--ease);
+  }
+
+  .chip :global(.icon) {
+    width: 18px;
+    height: 18px;
+  }
+
+  .chip:hover {
+    transform: translateY(-2px);
+  }
+
+  .count {
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-3);
+    transition: color 0.3s var(--ease);
+  }
+
+  /* lit up by the rotating headline */
+  .chip[data-active] {
+    background: var(--ink);
+    color: var(--bg);
+  }
+
+  .chip[data-active] .count {
+    color: color-mix(in oklab, var(--bg) 62%, transparent);
+  }
+
+  /* ---- the preview card ---- */
+  .peek {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 20;
+    overflow: hidden;
+    border-radius: 22px;
+    /* denser than other glass: it floats over the buttons */
+    background: color-mix(in oklab, var(--surface) 86%, transparent);
+    text-align: left;
+    pointer-events: none;
+    opacity: 0;
+    scale: 0.96;
+    transform-origin: 50% 100%;
+    transition:
+      opacity 0.2s var(--ease),
+      scale 0.3s var(--ease),
+      transform 0.4s var(--ease),
+      width 0.4s var(--ease),
+      height 0.4s var(--ease);
+  }
+
+  .peek[data-open] {
+    opacity: 1;
+    scale: 1;
+  }
+
+  .peek[data-below] {
+    transform-origin: 50% 0;
+  }
+
+  /* first appearance: jump into place, don't glide in from the last spot */
+  .peek:global(.is-placing) {
+    transition:
+      opacity 0.2s var(--ease),
+      scale 0.3s var(--ease);
+  }
+
+  .peek-panel {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: max-content;
+    padding: 12px 16px 14px;
+    opacity: 0;
+    transition: opacity 0.18s var(--ease);
+  }
+
+  .peek-panel[data-on] {
+    opacity: 1;
+    transition-delay: 0.06s;
+  }
+
+  .peek-head {
+    margin-bottom: 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .peek-head span {
+    font-weight: 500;
+    color: var(--ink-3);
+  }
+
+  .peek-apps {
+    display: grid;
+    grid-template-columns: repeat(var(--cols), 68px);
+    gap: 12px 6px;
+  }
+
+  .peek-apps li {
+    display: grid;
+    justify-items: center;
+    align-content: start;
+    gap: 6px;
+    text-align: center;
+  }
+
+  .peek-name {
+    max-width: 68px;
+    overflow: hidden;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.25;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--ink-2);
+  }
+
+  .peek-soon {
+    margin-top: -4px;
+    font-size: 0.625rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  /* phones: one row that scrolls sideways, so more categories don't stack up */
+  @media (max-width: 720px) {
+    .chips-wrap--scroll {
+      width: calc(100% + 32px);
+      margin-inline: -16px;
+    }
+
+    .chips-wrap--scroll .chips {
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      overflow-x: auto;
+      padding: 4px 16px 12px;
+      scroll-snap-type: x proximity;
+      scroll-padding-inline: 16px;
+      scrollbar-width: none;
+      mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 16px), transparent);
+    }
+
+    .chips-wrap--scroll .chips::-webkit-scrollbar {
+      display: none;
+    }
+
+    .chips-wrap--scroll li {
+      flex: none;
+      scroll-snap-align: start;
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-chips-preview]').forEach((wrap) => {
+    const peek = wrap.querySelector<HTMLElement>('[data-peek]');
+    if (!peek) return;
+    const panels = new Map([...peek.querySelectorAll<HTMLElement>('[data-for]')].map((p) => [p.dataset.for, p]));
+    const canHover = matchMedia('(hover: hover) and (pointer: fine)');
+    let hiding = 0;
+
+    const show = (chip: HTMLElement) => {
+      const panel = panels.get(chip.dataset.cat);
+      if (!panel) return;
+      window.clearTimeout(hiding);
+      panels.forEach((p) => p.toggleAttribute('data-on', p === panel));
+
+      const w = panel.offsetWidth;
+      const h = panel.offsetHeight;
+      const box = wrap.getBoundingClientRect();
+      const pill = chip.getBoundingClientRect();
+      const gap = 12;
+      // centred on the pill, kept on screen; above it unless that's under the nav
+      const viewport = document.documentElement.clientWidth;
+      const left = Math.min(Math.max(pill.left + pill.width / 2 - w / 2, 12), viewport - w - 12);
+      const below = pill.top - h - gap < 84;
+      const x = left - box.left;
+      const y = below ? pill.bottom - box.top + gap : pill.top - box.top - h - gap;
+
+      const first = !peek.hasAttribute('data-open');
+      if (first) peek.classList.add('is-placing');
+      peek.toggleAttribute('data-below', below);
+      peek.style.width = `${w}px`;
+      peek.style.height = `${h}px`;
+      peek.style.transform = `translate(${x}px, ${y}px)`;
+      if (first) {
+        void peek.offsetWidth;
+        peek.classList.remove('is-placing');
+      }
+      peek.setAttribute('data-open', '');
+    };
+
+    // a short grace period, so moving between pills doesn't flicker
+    const hide = () => {
+      window.clearTimeout(hiding);
+      hiding = window.setTimeout(() => peek.removeAttribute('data-open'), 140);
+    };
+
+    wrap.querySelectorAll<HTMLElement>('.chip[data-cat]').forEach((chip) => {
+      chip.addEventListener('pointerenter', () => canHover.matches && show(chip));
+      chip.addEventListener('pointerleave', hide);
+      chip.addEventListener('focus', () => chip.matches(':focus-visible') && show(chip));
+      chip.addEventListener('blur', hide);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') peek.removeAttribute('data-open');
+    });
+  });
+</script>

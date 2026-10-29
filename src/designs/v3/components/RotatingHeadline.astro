@@ -1,0 +1,168 @@
+---
+// The big tagline, "Apps that support your ___", where the last word cycles
+// through the categories. Category pills in the same hero light up with
+// their word, and pointing at a pill shows its word. Screen readers get the
+// plain tagline.
+import Icon from '../../../components/Icon.astro';
+import { categories } from '../data/categories';
+
+interface Props {
+  /** delay before the headline rises in, in ms */
+  delay?: number;
+}
+
+const { delay = 0 } = Astro.props;
+
+// "life" opens the loop, and is the word that stays with reduced motion
+const words = [
+  { word: 'life', cat: '', icon: '' },
+  ...categories.map((c) => ({ word: c.word ?? c.name.toLowerCase(), cat: c.slug, icon: c.icon })),
+];
+---
+
+{/* the capsule line stays on one line on purpose: whitespace inside it would show */}
+<h1 id="hero-title" class="headline rise" style={`--d:${delay}ms`} data-rotating-headline>
+  <span class="sr-only">Apps that support your life.</span>
+  <span class="visual" aria-hidden="true">
+    <span class="l1">Apps that support</span>
+    <span class="l2">
+      your <span class="capsule glass"><span class="slot" data-slot>{words.map((w, i) => <span class="word" data-word-cat={w.cat} data-state={i === 0 ? 'in' : undefined}>{w.icon && <Icon name={w.icon} />}{w.word}</span>)}</span></span>
+    </span>
+  </span>
+</h1>
+
+<style>
+  .headline {
+    font-size: clamp(2.9rem, 0.8rem + 7vw, 8.2rem);
+    font-weight: 600;
+    letter-spacing: -0.06em;
+    line-height: 0.95;
+    text-align: center;
+  }
+
+  .visual,
+  .l1,
+  .l2 {
+    display: block;
+  }
+
+  .l2 {
+    margin-top: 0.06em;
+  }
+
+  .capsule {
+    display: inline-block;
+    margin-left: 0.04em;
+    padding: 0.02em 0.32em 0.08em 0.26em;
+    border-radius: 999px;
+  }
+
+  /* the words share one grid cell; the slot is clipped to the current one
+     (overflow-x so wider waiting words don't widen the page) */
+  .slot {
+    display: inline-grid;
+    justify-items: start;
+    vertical-align: bottom;
+    overflow-x: clip;
+    clip-path: inset(-0.04em -0.1em 0.02em);
+  }
+
+  .slot:global(.is-live) {
+    transition: width 0.6s var(--ease);
+  }
+
+  .word {
+    grid-area: 1 / 1;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(105%);
+    transition:
+      transform 0.7s var(--ease),
+      opacity 0.45s var(--ease);
+  }
+
+  .word[data-state='in'] {
+    opacity: 1;
+    transform: none;
+  }
+
+  .word[data-state='out'] {
+    transform: translateY(-105%);
+  }
+
+  .word :global(.icon) {
+    display: inline-block;
+    width: 0.68em;
+    height: 0.68em;
+    margin-right: 0.12em;
+    vertical-align: -0.04em;
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-rotating-headline]').forEach((headline) => {
+    const slot = headline.querySelector<HTMLElement>('[data-slot]');
+    const words = slot ? [...slot.querySelectorAll<HTMLElement>('.word')] : [];
+    if (!slot || words.length < 2) return;
+
+    const hero = headline.closest('section') ?? document;
+    const chips = [...hero.querySelectorAll<HTMLElement>('.chip[data-cat]')];
+    const auto = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    let current = 0;
+    let timer = 0;
+    let widths: number[] = [];
+
+    // the slot hugs the current word, so the capsule resizes as words change
+    const measure = () => {
+      widths = words.map((w) => w.getBoundingClientRect().width);
+      slot.style.width = `${widths[current]}px`;
+    };
+
+    const show = (next: number) => {
+      if (next === current) return;
+      if (!widths.length) measure();
+      words.forEach((w) => {
+        if (w.dataset.state === 'out') delete w.dataset.state;
+      });
+      words[current].dataset.state = 'out';
+      words[next].dataset.state = 'in';
+      current = next;
+      slot.style.width = `${widths[current]}px`;
+      const cat = words[current].dataset.wordCat;
+      chips.forEach((c) => c.toggleAttribute('data-active', !!cat && c.dataset.cat === cat));
+    };
+
+    const stop = () => window.clearInterval(timer);
+    const start = () => {
+      stop();
+      if (auto && !document.hidden) timer = window.setInterval(() => show((current + 1) % words.length), 2400);
+    };
+
+    // pointing at a category says its word; leaving picks the loop back up
+    const pick = (chip: HTMLElement) => {
+      const i = words.findIndex((w) => w.dataset.wordCat === chip.dataset.cat);
+      if (i < 0) return;
+      stop();
+      show(i);
+    };
+    chips.forEach((chip) => {
+      chip.addEventListener('pointerenter', () => pick(chip));
+      chip.addEventListener('focus', () => pick(chip));
+      chip.addEventListener('pointerleave', start);
+      chip.addEventListener('blur', start);
+    });
+
+    document.fonts.ready.then(() => {
+      measure();
+      slot.classList.add('is-live');
+      start();
+    });
+    let resizing = 0;
+    window.addEventListener('resize', () => {
+      window.clearTimeout(resizing);
+      resizing = window.setTimeout(measure, 150);
+    });
+    document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
+  });
+</script>

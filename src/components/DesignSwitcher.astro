@@ -8,6 +8,8 @@ const path = pathname.startsWith(root) ? pathname.slice(root.length) || '/' : pa
 const match = path.match(/^\/v(\d)(\/.*)?$/);
 const current = match ? Number(match[1]) : 0;
 const rest = match?.[2] ?? '/';
+// pages every design has (home, categories, apps) carry over; anything else opens that design's home
+const shared = /^\/(?:$|apps\/|categories(?:\/|$))/.test(rest) ? rest : '/';
 const designs = [
   { n: 1, label: 'Playful' },
   { n: 2, label: 'Minimal' },
@@ -19,7 +21,7 @@ const designs = [
   <a href={join(root)} class="ds-all">Designs</a>
   {
     designs.map((d) => (
-      <a href={join(`${root}/v${d.n}`, rest)} aria-current={d.n === current ? 'page' : undefined} title={`Design ${d.n}: ${d.label}`}>
+      <a href={join(`${root}/v${d.n}`, d.n === current ? rest : shared)} aria-current={d.n === current ? 'page' : undefined} title={`Design ${d.n}: ${d.label}`}>
         <span class="sr-only">Design </span>
         {d.n}
       </a>
