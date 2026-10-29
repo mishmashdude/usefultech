@@ -2,7 +2,7 @@
 
 A little collective of apps that support your life, made by friends.
 
-Live at **https://mishmashdude.github.io/usefultech/**
+Live at **https://usefultech.keebbuddy.com/** (also still published at https://mishmashdude.github.io/usefultech/).
 
 Built with [Astro](https://astro.build) and plain CSS. No UI framework, very little JavaScript, and every page is static HTML.
 
@@ -19,10 +19,9 @@ Needs Node 22.12 or newer.
 
 ## Deploy
 
-Every push to `main` deploys to GitHub Pages through `.github/workflows/deploy.yml` (about a minute; watch it under the repo's Actions tab).
+Every push to `main` deploys to Netlify through `.github/workflows/netlify.yml`, which publishes https://usefultech.keebbuddy.com. The same push still updates GitHub Pages through `.github/workflows/deploy.yml`.
 
-The site lives under `/usefultech/`, set by `base` in `astro.config.mjs`. Links go through `to()` (each design's `base.ts`) or `root` (`src/lib/paths.ts`), so they pick up that prefix. Never hard-code a path like `/v3/…`.
-With a custom domain: set `site` to the domain and remove `base`.
+On Netlify the site is served from the domain root (`DEPLOY_TARGET=netlify` in `astro.config.mjs`). GitHub Pages still uses `/usefultech/`. Links go through `to()` (each design's `base.ts`) or `root` (`src/lib/paths.ts`), so they pick up that prefix. Never hard-code a path like `/v3/…`.
 
 ## Three designs
 
